@@ -1,0 +1,8 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[astro]": { "editor.defaultFormatter": "astro-build.astro-vscode" },
+  "eslint.validate": ["javascript", "typescript", "astro"],
+  "files.associations": { "*.md": "markdown" },
+  "search.exclude": { "dist": true, ".astro": true, "design": true }
+}

@@ -1,0 +1,58 @@
+{
+  "name": "nutricao-em-acao",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Nutricao em Acao — blog editorial bilingue sobre nutricao baseada em evidencias.",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "npm run prepare:assets && astro dev",
+    "build": "npm run prepare:assets && astro build && npm run index:search && npm run verify:build",
+    "build:fast": "astro build",
+    "preview": "astro preview",
+    "new": "node scripts/new-post.mjs",
+    "prepare:assets": "node scripts/prepare-assets.mjs",
+    "index:search": "pagefind --site dist",
+    "verify:build": "node scripts/verify-build.mjs",
+    "check": "astro check",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "audit:security": "npm audit --audit-level=high",
+    "validate": "npm run format:check && npm run lint && npm run check && npm run test && npm run build"
+  },
+  "dependencies": {
+    "@astrojs/markdown-remark": "7.2.2",
+    "@astrojs/rss": "4.0.19",
+    "@astrojs/sitemap": "3.7.3",
+    "@fontsource-variable/inter": "5.3.0",
+    "@fontsource-variable/manrope": "5.3.0",
+    "astro": "7.2.1",
+    "rehype-autolink-headings": "7.1.0",
+    "rehype-slug": "6.0.0",
+    "remark-directive": "4.0.0",
+    "sharp": "0.35.3",
+    "unist-util-visit": "5.1.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "@eslint/js": "10.0.1",
+    "@sveltia/cms": "0.188.1",
+    "@types/hast": "3.0.5",
+    "@types/mdast": "4.0.4",
+    "eslint": "10.8.1",
+    "eslint-plugin-astro": "3.1.0",
+    "globals": "17.11.0",
+    "pagefind": "1.5.2",
+    "prettier": "3.9.6",
+    "prettier-plugin-astro": "0.14.1",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.67.0",
+    "vitest": "4.1.10"
+  }
+}

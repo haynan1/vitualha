@@ -1,0 +1,41 @@
+# Build
+dist/
+.astro/
+.vercel/
+.netlify/
+
+# Dependencias
+node_modules/
+
+# Ambiente — nunca versionar segredo
+.env
+.env.*
+!.env.example
+
+# Assets gerados por scripts/prepare-assets.mjs (reproduziveis a partir do npm)
+public/fonts/
+public/admin/sveltia-cms.js
+
+# Derivados de public/favicon.svg e da marca, gerados no mesmo script. A fonte
+# de verdade é o SVG versionado — binario reproduzivel nao entra no historico.
+public/og-default.png
+public/apple-touch-icon.png
+public/icon-192.png
+public/icon-512.png
+
+# Indice de busca gerado no build
+public/pagefind/
+
+# Sistema / editor
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Cache de ferramentas
+.eslintcache
+coverage/

@@ -1,0 +1,22 @@
+# Fim de linha normalizado em LF no repositorio e na copia de trabalho.
+#
+# O Prettier formata em LF (padrao da ferramenta) e `npm run format:check` é
+# porta de CI. Sem esta regra, um clone feito no Windows com core.autocrlf=true
+# checaria os arquivos em CRLF e reprovaria a formatacao de codigo que ninguem
+# tocou — falha confusa, custosa de diagnosticar e que nao diz respeito ao
+# conteudo do commit.
+* text=auto eol=lf
+
+# Binarios: nunca normalizar.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.avif binary
+*.ico binary
+*.woff2 binary
+
+# Gerado: o GitHub colapsa por padrao na revisao. Sem `-diff` de proposito —
+# ler o diff do lock antes de aceitar atualizacao de dependencia é justamente
+# a pratica que ARCHITECTURE.md exige para a cadeia de suprimento do CMS.
+package-lock.json linguist-generated
