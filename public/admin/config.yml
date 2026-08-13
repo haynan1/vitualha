@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Editor visual do Nutricao em Acao (Sveltia CMS)
+# Editor visual da Vitualha (Sveltia CMS)
 #
 # Dois modos de uso:
 #
@@ -19,7 +19,7 @@
 
 backend:
   name: github
-  repo: haynan1/nutricao_blog
+  repo: haynan1/vitualha
   branch: main
 
 # Grava direto no branch (sem pull request). Para revisao antes de publicar,

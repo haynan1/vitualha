@@ -1,10 +1,10 @@
 ---
 title: Termos de uso
-description: Condições de uso do site, direitos sobre o conteúdo publicado e limites de responsabilidade do Nutrição em Ação.
+description: Condições de uso do site, direitos sobre o conteúdo publicado e limites de responsabilidade da Vitualha.
 updatedAt: 2026-08-12
 ---
 
-Ao navegar pelo Nutrição em Ação, você concorda com as condições abaixo.
+Ao navegar pela Vitualha, você concorda com as condições abaixo.
 
 ## Finalidade do conteúdo
 
@@ -18,7 +18,7 @@ Empregamos cuidado editorial e revisão técnica na produção do conteúdo, mas
 
 ## Propriedade intelectual
 
-Textos, imagens, identidade visual e demais materiais publicados pertencem ao Nutrição em Ação e são protegidos pela legislação de direitos autorais.
+Textos, imagens, identidade visual e demais materiais publicados pertencem à Vitualha e são protegidos pela legislação de direitos autorais.
 
 É permitido citar trechos com atribuição clara e link para a página original. Não é permitida a reprodução integral de artigos, a republicação sem autorização nem o uso comercial do conteúdo.
 

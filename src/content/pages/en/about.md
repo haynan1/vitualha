@@ -1,10 +1,10 @@
 ---
-title: About Nutrição em Ação
+title: About Vitualha
 description: Who writes here, how we write, and why this site exists — nutrition information that respects the reader's intelligence.
 updatedAt: 2026-08-12
 ---
 
-**Nutrição em Ação** exists for a simple reason: most nutrition content available today sits somewhere between incomplete and irresponsible. Easy headline, fast promise, no source.
+**Vitualha** exists for a simple reason: most nutrition content available today sits somewhere between incomplete and irresponsible. Easy headline, fast promise, no source.
 
 Our standard is the opposite. Every article starts from the scientific literature, is written by a registered dietitian, and goes through technical review before publication. When the evidence is weak or contradictory, we say so instead of picking the more attractive side.
 

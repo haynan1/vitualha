@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Nutricao em Acao — configuracao do servidor (Hostinger / LiteSpeed / Apache)
+# Vitualha — configuracao do servidor (Hostinger / LiteSpeed / Apache)
 #
 # Este arquivo é copiado para dist/ no build e vai para public_html no deploy.
 # Ele carrega tres responsabilidades: canonizacao de URL, cabecalhos de
@@ -35,6 +35,28 @@ ServerSignature Off
 </IfModule>
 
 ErrorDocument 404 /404.html
+
+# ── Endereco provisorio fora do indice ───────────────────────────────────────
+# Enquanto o dominio definitivo nao aponta para ca, o site responde no endereco
+# temporario da Hostinger. As tags canonical ja apontam para o dominio real, o
+# que na pratica basta — mas canonical é dica, nao ordem: o Google pode indexar
+# o endereco temporario mesmo assim, e o dominio definitivo estrearia disputando
+# posicao com uma copia de si mesmo.
+#
+# A marcacao é pelo host provisorio, e nao pela negacao do definitivo, de
+# proposito: se o mod_setenvif nao estiver carregado, a variavel nunca é
+# definida e o cabecalho simplesmente nao sai. Errar para "indexa" custa um
+# endereco temporario no Google; errar para "nao indexa" tiraria o site inteiro
+# de producao do indice, em silencio.
+#
+# A regra se desliga sozinha no dia da virada: no dominio real o Host nao casa.
+# Nao ha nada para lembrar de remover depois.
+<IfModule mod_setenvif.c>
+  SetEnvIf Host "\.(hostingersite\.com|hstgr\.io|preview-domain\.com)$" ENDERECO_PROVISORIO
+</IfModule>
+<IfModule mod_headers.c>
+  Header always set X-Robots-Tag "noindex, nofollow" env=ENDERECO_PROVISORIO
+</IfModule>
 
 # ── Cabecalhos de seguranca ──────────────────────────────────────────────────
 <IfModule mod_headers.c>

@@ -48,7 +48,7 @@ const pt = {
     noTranslationNotice:
       'Este artigo ainda não possui tradução completa em inglês. Exibindo o conteúdo original em português.',
     medicalDisclaimer:
-      'As informações publicadas no Nutrição em Ação possuem caráter educacional e informativo e não substituem orientação individual de médicos, nutricionistas ou outros profissionais de saúde.',
+      'As informações publicadas na Vitualha possuem caráter educacional e informativo e não substituem orientação individual de médicos, nutricionistas ou outros profissionais de saúde.',
   },
   category: {
     featuredTitle: 'Em destaque',
@@ -85,7 +85,7 @@ const pt = {
     privacy: 'Política de privacidade',
     terms: 'Termos de uso',
     disclaimer:
-      'As informações publicadas no Nutrição em Ação possuem caráter educacional e informativo e não substituem orientação individual de médicos, nutricionistas ou outros profissionais de saúde.',
+      'As informações publicadas na Vitualha possuem caráter educacional e informativo e não substituem orientação individual de médicos, nutricionistas ou outros profissionais de saúde.',
     copyright: 'Todos os direitos reservados.',
     rss: 'Assinar RSS',
   },
@@ -103,7 +103,7 @@ const pt = {
     homeDescription:
       'Artigos sobre alimentação, nutrientes e saúde, escritos por nutricionistas e apoiados em ciência.',
     articlesDescription:
-      'Todo o acervo do Nutrição em Ação: alimentos, nutrientes, saúde, fitness e receitas.',
+      'Todo o acervo da Vitualha: alimentos, nutrientes, saúde, fitness e receitas.',
     searchDescription: 'Busque artigos sobre alimentos, nutrientes, saúde e receitas.',
   },
 } satisfies Record<string, Record<string, string>>;
@@ -153,7 +153,7 @@ const en: UIDict = {
     noTranslationNotice:
       'This article does not yet have a full English translation. Showing the original Portuguese content.',
     medicalDisclaimer:
-      'Content published on Nutrição em Ação is for educational and informational purposes only and is not a substitute for personalized advice from physicians, dietitians, or other healthcare professionals.',
+      'Content published on Vitualha is for educational and informational purposes only and is not a substitute for personalized advice from physicians, dietitians, or other healthcare professionals.',
   },
   category: {
     featuredTitle: 'Featured',
@@ -190,7 +190,7 @@ const en: UIDict = {
     privacy: 'Privacy policy',
     terms: 'Terms of use',
     disclaimer:
-      'Content published on Nutrição em Ação is for educational and informational purposes only and is not a substitute for personalized advice from physicians, dietitians, or other healthcare professionals.',
+      'Content published on Vitualha is for educational and informational purposes only and is not a substitute for personalized advice from physicians, dietitians, or other healthcare professionals.',
     copyright: 'All rights reserved.',
     rss: 'Subscribe via RSS',
   },
@@ -208,7 +208,7 @@ const en: UIDict = {
     homeDescription:
       'Articles about food, nutrients and health, written by dietitians and grounded in science.',
     articlesDescription:
-      'The full Nutrição em Ação archive: foods, nutrients, health, fitness and recipes.',
+      'The full Vitualha archive: foods, nutrients, health, fitness and recipes.',
     searchDescription: 'Search articles about foods, nutrients, health and recipes.',
   },
 };

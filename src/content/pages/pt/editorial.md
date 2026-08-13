@@ -1,6 +1,6 @@
 ---
 title: Política editorial
-description: Como escolhemos os temas, quais fontes aceitamos, quem revisa e como corrigimos erros no Nutrição em Ação.
+description: Como escolhemos os temas, quais fontes aceitamos, quem revisa e como corrigimos erros na Vitualha.
 updatedAt: 2026-08-12
 ---
 

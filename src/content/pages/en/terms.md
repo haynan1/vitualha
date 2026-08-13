@@ -1,10 +1,10 @@
 ---
 title: Terms of use
-description: Conditions for using the site, rights over published content, and the limits of liability of Nutrição em Ação.
+description: Conditions for using the site, rights over published content, and the limits of liability of Vitualha.
 updatedAt: 2026-08-12
 ---
 
-By browsing Nutrição em Ação, you agree to the conditions below.
+By browsing Vitualha, you agree to the conditions below.
 
 ## Purpose of the content
 
@@ -18,7 +18,7 @@ We apply editorial care and technical review when producing content, but we do n
 
 ## Intellectual property
 
-Text, images, visual identity and other published material belong to Nutrição em Ação and are protected by copyright law.
+Text, images, visual identity and other published material belong to Vitualha and are protected by copyright law.
 
 Quoting excerpts with clear attribution and a link to the original page is permitted. Full reproduction of articles, republication without authorization, and commercial use of the content are not.
 

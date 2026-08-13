@@ -1,10 +1,10 @@
 ---
-title: Sobre o Nutrição em Ação
+title: Sobre a Vitualha
 description: Quem escreve, como escrevemos e por que este site existe — informação sobre alimentação que respeita a inteligência de quem lê.
 updatedAt: 2026-08-12
 ---
 
-O **Nutrição em Ação** existe por um motivo simples: a maior parte do conteúdo sobre alimentação disponível hoje está em algum lugar entre o incompleto e o irresponsável. Manchete fácil, promessa rápida, fonte nenhuma.
+A **Vitualha** existe por um motivo simples: a maior parte do conteúdo sobre alimentação disponível hoje está em algum lugar entre o incompleto e o irresponsável. Manchete fácil, promessa rápida, fonte nenhuma.
 
 Nosso critério é o oposto. Cada artigo parte da literatura científica, é escrito por nutricionista e passa por revisão técnica antes de ser publicado. Quando a evidência é fraca ou contraditória, dizemos isso em vez de escolher o lado mais atraente.
 

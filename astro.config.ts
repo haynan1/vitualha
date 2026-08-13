@@ -20,11 +20,11 @@ const { PUBLIC_SITE_URL } = env;
  * time. It must be the real production origin, so a missing value fails loudly
  * here instead of silently shipping localhost URLs to Google.
  */
-const site = PUBLIC_SITE_URL?.trim() || 'https://nutricaoemacao.com.br';
+const site = PUBLIC_SITE_URL?.trim() || 'https://vitualha.com';
 
 if (!/^https:\/\/[^/]+$/.test(site)) {
   throw new Error(
-    `PUBLIC_SITE_URL invalido: "${site}". Use a origem https sem barra final, ex: https://nutricaoemacao.com.br`,
+    `PUBLIC_SITE_URL invalido: "${site}". Use a origem https sem barra final, ex: https://vitualha.com`,
   );
 }
 

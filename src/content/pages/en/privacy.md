@@ -1,10 +1,10 @@
 ---
 title: Privacy policy
-description: What data Nutrição em Ação collects, how the advertising on this site works, and what your rights are under Brazil's General Data Protection Law.
+description: What data Vitualha collects, how the advertising on this site works, and what your rights are under Brazil's General Data Protection Law.
 updatedAt: 2026-08-13
 ---
 
-This policy explains how personal data is handled at Nutrição em Ação, in accordance with Brazilian Law 13.709/2018 (LGPD).
+This policy explains how personal data is handled at Vitualha, in accordance with Brazilian Law 13.709/2018 (LGPD).
 
 ## Three-sentence summary
 
@@ -57,7 +57,7 @@ More detail in [How Google uses information from sites or apps that use our serv
 
 The LGPD grants you: confirmation that processing exists, access to your data, correction of incomplete or outdated data, anonymization or deletion of unnecessary data, portability, information about sharing, and withdrawal of consent.
 
-To exercise any of these rights over data we process, write to **contato@nutricaoemacao.com.br**. We respond within the legal deadline. For data Google processes as a controller, the request must go directly to Google, through the channels listed in its privacy policy.
+To exercise any of these rights over data we process, write to **contato@vitualha.com**. We respond within the legal deadline. For data Google processes as a controller, the request must go directly to Google, through the channels listed in its privacy policy.
 
 ## Minors
 

@@ -84,9 +84,9 @@ async function generateDefaultOgImage() {
     <rect width="1200" height="630" fill="url(#glow)"/>
     <circle cx="104" cy="104" r="34" fill="#66BB6A"/>
     <text x="104" y="118" font-family="sans-serif" font-size="38" font-weight="bold"
-      fill="#0E1A0F" text-anchor="middle">N</text>
+      fill="#0E1A0F" text-anchor="middle">V</text>
     <text x="152" y="118" font-family="sans-serif" font-size="30" font-weight="bold"
-      fill="#F2F2EF">Nutrição em Ação</text>
+      fill="#F2F2EF">Vitualha</text>
     <text x="72" y="352" font-family="sans-serif" font-size="82" font-weight="bold"
       fill="#F2F2EF">Nutrição baseada</text>
     <text x="72" y="446" font-family="sans-serif" font-size="82" font-weight="bold"

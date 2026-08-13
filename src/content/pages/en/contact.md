@@ -1,10 +1,10 @@
 ---
 title: Contact
-description: How to reach the Nutrição em Ação team — questions, story suggestions, corrections and partnerships.
+description: How to reach the Vitualha team — questions, story suggestions, corrections and partnerships.
 updatedAt: 2026-08-12
 ---
 
-Write to **contato@nutricaoemacao.com.br**. We read every message and reply within five business days.
+Write to **contato@vitualha.com**. We read every message and reply within five business days.
 
 ## Story suggestions
 

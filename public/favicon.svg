@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Nutrição em Ação">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Vitualha">
   <rect width="64" height="64" rx="16" fill="#2E7D32" />
   <path
-    d="M20 45V19h5.6l13 17.5V19H44v26h-5.6l-13-17.5V45H20z"
+    d="M19 19h6.6l6.4 18.6L38.4 19H45l-9.5 26h-7L19 19z"
     fill="#FFFFFF"
   />
 </svg>

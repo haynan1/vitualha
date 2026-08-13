@@ -1,6 +1,6 @@
 ---
 title: Editorial policy
-description: How we choose topics, which sources we accept, who reviews the content and how we correct mistakes at Nutrição em Ação.
+description: How we choose topics, which sources we accept, who reviews the content and how we correct mistakes at Vitualha.
 updatedAt: 2026-08-12
 ---
 

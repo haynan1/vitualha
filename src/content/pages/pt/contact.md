@@ -1,10 +1,10 @@
 ---
 title: Contato
-description: Como falar com a equipe do Nutrição em Ação — dúvidas, sugestões de pauta, correções e parcerias.
+description: Como falar com a equipe da Vitualha — dúvidas, sugestões de pauta, correções e parcerias.
 updatedAt: 2026-08-12
 ---
 
-Escreva para **contato@nutricaoemacao.com.br**. Lemos todas as mensagens e respondemos em até cinco dias úteis.
+Escreva para **contato@vitualha.com**. Lemos todas as mensagens e respondemos em até cinco dias úteis.
 
 ## Sugestão de pauta
 

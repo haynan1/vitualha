@@ -6,11 +6,11 @@ import type { Locale } from '../i18n/locales';
  * de variavel de ambiente. Ver .env.example.
  */
 export const SITE = {
-  name: 'Nutrição em Ação',
-  shortName: 'Nutrição em Ação',
+  name: 'Vitualha',
+  shortName: 'Vitualha',
   /** Iniciais do logotipo. */
-  monogram: 'N',
-  email: 'contato@nutricaoemacao.com.br',
+  monogram: 'V',
+  email: 'contato@vitualha.com',
   /** Perfis oficiais. Entradas vazias sao omitidas do rodape e do JSON-LD. */
   social: {
     instagram: '',
@@ -18,7 +18,7 @@ export const SITE = {
     linkedin: '',
   },
   /** Usado no JSON-LD Organization e no rodape. */
-  legalName: 'Nutrição em Ação',
+  legalName: 'Vitualha',
   foundingYear: 2026,
 } as const;
 

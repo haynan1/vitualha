@@ -1,4 +1,4 @@
-# Nutrição em Ação
+# Vitualha
 
 Blog editorial bilíngue (PT-BR / EN) sobre nutrição baseada em evidências.
 Site estático em Astro, conteúdo em Markdown versionado no Git, editor visual

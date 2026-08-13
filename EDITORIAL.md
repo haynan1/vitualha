@@ -1,6 +1,6 @@
 # Guia editorial
 
-Como escrever, traduzir e publicar no Nutrição em Ação. Este guia é sobre
+Como escrever, traduzir e publicar na Vitualha. Este guia é sobre
 conteúdo — decisões técnicas estão em [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ---

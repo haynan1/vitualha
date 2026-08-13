@@ -1,4 +1,4 @@
-# Arquitetura — Nutrição em Ação
+# Arquitetura — Vitualha
 
 Blog editorial bilíngue (PT-BR / EN) sobre nutrição baseada em evidências.
 Site estático, conteúdo versionado em Git, editado por interface visual,

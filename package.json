@@ -1,9 +1,9 @@
 {
-  "name": "nutricao-em-acao",
+  "name": "vitualha",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Nutricao em Acao — blog editorial bilingue sobre nutricao baseada em evidencias.",
+  "description": "Vitualha — blog editorial bilingue sobre nutricao baseada em evidencias.",
   "engines": {
     "node": ">=22.12.0"
   },

@@ -1,10 +1,10 @@
 ---
 title: Política de privacidade
-description: Quais dados o Nutrição em Ação coleta, como funciona a publicidade exibida no site e quais são os seus direitos sob a Lei Geral de Proteção de Dados.
+description: Quais dados a Vitualha coleta, como funciona a publicidade exibida no site e quais são os seus direitos sob a Lei Geral de Proteção de Dados.
 updatedAt: 2026-08-13
 ---
 
-Esta política explica o tratamento de dados pessoais no Nutrição em Ação, conforme a Lei nº 13.709/2018 (LGPD).
+Esta política explica o tratamento de dados pessoais na Vitualha, conforme a Lei nº 13.709/2018 (LGPD).
 
 ## Resumo em três frases
 
@@ -57,7 +57,7 @@ Mais detalhes em [Como o Google usa dados de sites e apps que utilizam nossos se
 
 A LGPD garante a você: confirmação da existência de tratamento, acesso aos dados, correção de dados incompletos ou desatualizados, anonimização ou eliminação de dados desnecessários, portabilidade, informação sobre compartilhamento e revogação de consentimento.
 
-Para exercer qualquer um desses direitos sobre os dados tratados por nós, escreva para **contato@nutricaoemacao.com.br**. Respondemos dentro do prazo legal. Para dados tratados pelo Google como controlador, o pedido deve ser feito diretamente a ele, pelos canais indicados na política de privacidade do Google.
+Para exercer qualquer um desses direitos sobre os dados tratados por nós, escreva para **contato@vitualha.com**. Respondemos dentro do prazo legal. Para dados tratados pelo Google como controlador, o pedido deve ser feito diretamente a ele, pelos canais indicados na política de privacidade do Google.
 
 ## Menores de idade
 
