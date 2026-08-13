@@ -46,6 +46,7 @@ jobs:
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
           SITE_URL: ${{ vars.PUBLIC_SITE_URL }}
+          FTP_SERVER_DIR: ${{ vars.FTP_SERVER_DIR }}
         run: |
           ausentes=()
           [ -n "$FTP_SERVER" ]   || ausentes+=("FTP_SERVER")
@@ -75,7 +76,18 @@ jobs:
             echo "::warning::PUBLIC_SITE_URL nao definido em Variables — o site foi construido com o dominio padrao do astro.config.ts."
           fi
 
+          # A acao trata server-dir como caminho de diretorio: sem a barra
+          # final ela concatena com o nome do arquivo e cria caminho irmao.
+          case "${FTP_SERVER_DIR:-public_html/}" in
+            */) ;;
+            *)
+              echo "::error::FTP_SERVER_DIR precisa terminar com barra, ex: domains/exemplo.com/public_html/"
+              exit 1
+              ;;
+          esac
+
           echo "Credenciais presentes e com formato plausivel."
+          echo "Destino: ${FTP_SERVER_DIR:-public_html/}"
 
       - name: Baixar o site construido
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -101,7 +113,12 @@ jobs:
           protocol: ftps
           port: 21
           local-dir: ./dist/
-          server-dir: public_html/
+          # Configuravel porque o caminho depende do arranjo da hospedagem, e
+          # nao do projeto: conta FTP da raiz usa public_html/, dominio
+          # adicional usa domains/exemplo.com/public_html/, e conta FTP criada
+          # ja apontada para a pasta do site usa ./ — o valor certo é o que o
+          # hPanel mostra em Contas FTP. Fixar isso no codigo custou um dia.
+          server-dir: ${{ vars.FTP_SERVER_DIR || 'public_html/' }}
           # A acao mantem um estado no servidor e envia so o que mudou —
           # um artigo novo nao reenvia o site inteiro.
           state-name: .ftp-deploy-state.json
@@ -111,3 +128,36 @@ jobs:
             **/.git*/**
             **/node_modules/**
             .ftp-deploy-state.json
+
+      # "Deploy verde" precisa significar "site no ar", e nao "arquivo em
+      # algum lugar do servidor". Um server-dir apontando para fora da raiz
+      # que o dominio serve envia tudo, devolve sucesso e deixa o site antigo
+      # publicado — sem nenhum sinal de erro. Foi exatamente o que aconteceu
+      # aqui, e so apareceu porque alguem foi olhar o site com a mao.
+      #
+      # A checagem busca o /robots.txt porque ele é gerado a partir do `site`
+      # do build: se responde com a linha Sitemap, o que esta publicado veio
+      # deste artefato, e nao de um arquivo antigo que sobrou na pasta.
+      - name: Conferir que o site publicado é este
+        env:
+          SITE_URL: ${{ vars.PUBLIC_SITE_URL }}
+        run: |
+          base="${SITE_URL:-https://vitualha.com}"
+          base="${base%/}"
+
+          # Hospedagem compartilhada leva alguns segundos para expor o que
+          # acabou de chegar por FTP; tres tentativas evitam falso negativo.
+          for tentativa in 1 2 3; do
+            if curl -fsS --max-time 20 "$base/robots.txt" | grep -q '^Sitemap:'; then
+              echo "Publicado e respondendo em $base."
+              exit 0
+            fi
+            sleep 5
+          done
+
+          echo "::error::$base/robots.txt nao responde com o conteudo deste build."
+          echo "O envio FTP terminou sem erro, entao o mais provavel é o destino:"
+          echo "os arquivos foram para uma pasta que este dominio nao serve."
+          echo "Veja o diretorio da conta FTP no hPanel (Arquivos > Contas FTP) e"
+          echo "ajuste a Variable FTP_SERVER_DIR para esse caminho, com barra no fim."
+          exit 1
