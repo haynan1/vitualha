@@ -1,0 +1,50 @@
+---
+import { ADSENSE_CLIENT, ADS_LIVE, hasSlot, slotId, type AdSlotName } from '@/config/ads';
+import type { Locale } from '@/i18n/locales';
+
+type Props = {
+  name: AdSlotName;
+  locale: Locale;
+  /** Altura reservada, para o conteudo nao pular quando o anuncio carrega. */
+  minHeight?: number;
+  format?: 'auto' | 'fluid' | 'rectangle';
+  class?: string | undefined;
+};
+
+const { name, locale, minHeight = 280, format = 'auto', class: className } = Astro.props;
+
+const render = hasSlot(name);
+const label = locale === 'pt' ? 'Publicidade' : 'Advertisement';
+---
+
+{
+  render && (
+    <aside
+      class:list={['ad', className]}
+      style={`--ad-min-height: ${minHeight}px;`}
+      aria-label={label}
+      data-pagefind-ignore
+    >
+      {/*
+        O rotulo é exigido pela politica do AdSense e é o certo a fazer: o
+        leitor precisa distinguir conteudo de anuncio sem esforco.
+        Estilos em src/styles/ads.css — compartilhados com o bloco que o
+        pipeline de Markdown injeta dentro do artigo.
+      */}
+      <span class="ad__label">{label}</span>
+
+      {ADS_LIVE ? (
+        <ins
+          class="adsbygoogle ad__unit"
+          style="display:block"
+          data-ad-client={ADSENSE_CLIENT}
+          data-ad-slot={slotId(name)}
+          data-ad-format={format}
+          data-full-width-responsive="true"
+        />
+      ) : (
+        <div class="ad__placeholder">{name}</div>
+      )}
+    </aside>
+  )
+}

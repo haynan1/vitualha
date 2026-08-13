@@ -1,0 +1,41 @@
+---
+/**
+ * Tags do AdSense no <head>, escritas apenas nas paginas que exibem anuncio.
+ *
+ * A pagina declara a superficie (ver AdSurface em src/config/ads.ts) porque o
+ * <head> é renderizado antes do corpo: aqui ainda nao existe bloco algum para
+ * observar. Sem essa declaracao o script sairia em todas as paginas, e a
+ * politica de privacidade abriria conexao com o servidor de anuncio do Google
+ * sem exibir um bloco sequer.
+ *
+ * O script de ativacao é /ads.js, arquivo de caminho fixo em public/, e nao um
+ * <script> de componente: script de componente entra pelo grafo de modulos da
+ * pagina e sairia em todo lugar, condicional ou nao.
+ */
+import { ADSENSE_CLIENT, ADS_LIVE, surfaceHasAds, type AdSurface } from '@/config/ads';
+
+type Props = { surface?: AdSurface | undefined };
+
+const { surface } = Astro.props;
+const load = ADS_LIVE && surfaceHasAds(surface);
+---
+
+{
+  load && (
+    <>
+      {/* O anuncio so rende se chegar a tempo: abrir a conexao aqui poupa
+          DNS + TLS depois. Fica restrito as paginas que de fato vao buscar
+          nesta origem. */}
+      <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin />
+
+      <script
+        is:inline
+        async
+        crossorigin="anonymous"
+        src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
+      />
+
+      <script is:inline defer src="/ads.js" />
+    </>
+  )
+}

@@ -1,0 +1,54 @@
+/**
+ * Espacos de anuncio.
+ *
+ * Global, e nao com escopo de componente, porque o bloco dentro do artigo é
+ * inserido no pipeline de Markdown (src/plugins/rehype-in-article-ad.ts) e
+ * nao passa pelo compilador de componentes — os dois lugares precisam usar
+ * exatamente a mesma aparencia.
+ */
+
+.ad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  /* Altura reservada antes de o anuncio existir: sem isso o texto pula
+     quando ele carrega, o que estraga a leitura e derruba o CLS — que por
+     sua vez derruba o proprio faturamento. */
+  min-height: var(--ad-min-height, 280px);
+  margin-block: var(--space-7);
+}
+
+.ad__label {
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.ad__unit {
+  display: block;
+  width: 100%;
+}
+
+/* Fora de producao: so o espaco marcado, sem carregar nada do Google. */
+.ad__placeholder {
+  flex: 1;
+  width: 100%;
+  min-height: calc(var(--ad-min-height, 280px) - 2rem);
+  display: grid;
+  place-items: center;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+/* Dentro do artigo o bloco acompanha a medida do texto. */
+.prose .ad {
+  max-width: var(--measure);
+  margin-inline: auto;
+}
