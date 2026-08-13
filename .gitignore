@@ -22,6 +22,7 @@ public/og-default.png
 public/apple-touch-icon.png
 public/icon-192.png
 public/icon-512.png
+public/favicon.ico
 
 # Indice de busca gerado no build
 public/pagefind/

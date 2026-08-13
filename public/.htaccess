@@ -133,7 +133,7 @@ ErrorDocument 404 /404.html
   </FilesMatch>
 
   # Arquivos de caminho fixo mudam sem trocar de nome: precisam revalidar.
-  <FilesMatch "^(theme\.js|ads\.js|favicon\.svg|site\.webmanifest|robots\.txt|sitemap.*\.xml)$">
+  <FilesMatch "^(theme\.js|ads\.js|favicon\.svg|favicon\.ico|site\.webmanifest|robots\.txt|sitemap.*\.xml)$">
     Header set Cache-Control "public, max-age=3600, must-revalidate"
   </FilesMatch>
 

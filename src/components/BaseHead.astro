@@ -95,6 +95,11 @@ const structuredData = graph([organizationSchema(site), websiteSchema(site, loca
      Arquivo externo (nao inline) para a CSP poder exigir script-src 'self'. -->
 <script src="/theme.js" is:inline></script>
 
+<!-- Ordem proposital: o .ico vem primeiro como piso, e o SVG logo depois.
+     Navegador que entende image/svg+xml fica com o vetor (nitido em qualquer
+     densidade de tela e um arquivo so); quem nao entende ignora essa linha e
+     cai no .ico, que tambem atende quem pede /favicon.ico sem ler o HTML. -->
+<link rel="icon" href="/favicon.ico" sizes="32x32" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />

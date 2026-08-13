@@ -12,7 +12,7 @@
  * Idempotente: rodar de novo so reescreve o que mudou de tamanho.
  */
 import { createRequire } from 'node:module';
-import { copyFile, mkdir, readFile, stat } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -142,6 +142,74 @@ async function generateIcons() {
   return created;
 }
 
+/**
+ * favicon.ico multi-resolucao, derivado do mesmo favicon.svg.
+ *
+ * O SVG resolve o navegador moderno, mas /favicon.ico continua sendo pedido
+ * sem link nenhum no HTML: leitor de RSS, o servico de favicon do Google (que
+ * alimenta o icone no resultado de busca), navegador antigo e gerenciador de
+ * bookmark vao direto nesse caminho. Sem o arquivo, cada pedido desses vira
+ * 404 — e o icone no Google fica generico.
+ *
+ * Tres quadros porque o ICO carrega varios tamanhos no mesmo arquivo e cada
+ * consumidor escolhe o seu: 16 (aba), 32 (atalho, retina da aba), 48 (lista
+ * de favoritos do Windows). Reduzir a partir do vetor em cada tamanho da um
+ * resultado melhor do que deixar o cliente reamostrar um PNG unico.
+ *
+ * O container é montado aqui a mao: o sharp nao escreve .ico, e a alternativa
+ * seria mais uma dependencia de producao para 54 bytes de cabecalho. O
+ * conteudo de cada quadro é PNG, aceito por tudo que nao seja IE6.
+ */
+async function generateFaviconIco() {
+  const target = join(root, 'public', 'favicon.ico');
+  if ((await sizeOf(target)) > 0) return false;
+
+  const sizes = [16, 32, 48];
+
+  try {
+    const { default: sharp } = await import('sharp');
+    const svg = await readFile(join(root, 'public', 'favicon.svg'));
+
+    const frames = await Promise.all(
+      sizes.map((size) =>
+        sharp(svg, { density: 384 }).resize(size, size).png({ compressionLevel: 9 }).toBuffer(),
+      ),
+    );
+
+    // ICONDIR: reservado, tipo (1 = icone), quantidade de quadros.
+    const header = Buffer.alloc(6);
+    header.writeUInt16LE(0, 0);
+    header.writeUInt16LE(1, 2);
+    header.writeUInt16LE(frames.length, 4);
+
+    // Cada ICONDIRENTRY tem 16 bytes e os dados vem todos depois do diretorio.
+    let offset = 6 + frames.length * 16;
+
+    const entries = frames.map((png, index) => {
+      const entry = Buffer.alloc(16);
+      // Largura e altura ocupam um byte cada, entao 256 é escrito como 0.
+      // Nenhum quadro aqui chega a 256, mas a conta fica correta se alguem
+      // acrescentar esse tamanho na lista.
+      entry.writeUInt8(sizes[index] % 256, 0);
+      entry.writeUInt8(sizes[index] % 256, 1);
+      entry.writeUInt8(0, 2); // paleta: nao se aplica a quadro PNG
+      entry.writeUInt8(0, 3); // reservado
+      entry.writeUInt16LE(1, 4); // planos de cor
+      entry.writeUInt16LE(32, 6); // bits por pixel
+      entry.writeUInt32LE(png.length, 8);
+      entry.writeUInt32LE(offset, 12);
+      offset += png.length;
+      return entry;
+    });
+
+    await writeFile(target, Buffer.concat([header, ...entries, ...frames]));
+    return true;
+  } catch (error) {
+    console.warn(`[assets] favicon.ico nao gerado (${error.message}) — seguindo sem ele`);
+    return false;
+  }
+}
+
 async function main() {
   let copied = 0;
 
@@ -160,6 +228,7 @@ async function main() {
   if (cmsChanged) copied += 1;
   if (await generateDefaultOgImage()) copied += 1;
   copied += await generateIcons();
+  if (await generateFaviconIco()) copied += 1;
 
   console.log(
     copied > 0
