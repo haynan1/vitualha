@@ -1,0 +1,157 @@
+/**
+ * Design tokens — fonte unica de verdade visual.
+ *
+ * Regra de tema: a paleta clara é definida em `:root` puro. O modo escuro é
+ * redefinido em dois lugares — na media query (para quem nunca escolheu) e no
+ * atributo `[data-theme]` (para quem escolheu). Nenhuma cor existe apenas
+ * dentro de um bloco condicional, entao nao ha estado sem cor definida.
+ */
+
+:root {
+  /* ── Cor ─────────────────────────────────────────────────────────────── */
+  --bg: #fafaf7;
+  --bg-subtle: #f4f4f0;
+  --surface: #ffffff;
+  --surface-hover: #f7f7f4;
+  --text: #1c1c1c;
+  --text-muted: #666666;
+  --text-faint: #72726f;
+  --border: rgba(28, 28, 28, 0.09);
+  --border-strong: rgba(28, 28, 28, 0.16);
+  --primary: #2e7d32;
+  --primary-strong: #1b5e20;
+  --primary-contrast: #ffffff;
+  --tint: #e8f5e9;
+  --header-bg: rgba(250, 250, 247, 0.82);
+  --focus: #1b5e20;
+  --selection: rgba(46, 125, 50, 0.18);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 2px 4px rgba(0, 0, 0, 0.05), 0 18px 48px rgba(0, 0, 0, 0.09);
+
+  /* ── Tipografia ──────────────────────────────────────────────────────── */
+  --font-display: 'Manrope Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-body: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Roboto Mono', monospace;
+
+  /* Escala fluida: cresce entre 380px e 1280px de viewport. */
+  --text-xs: clamp(0.75rem, 0.73rem + 0.1vw, 0.8rem);
+  --text-sm: clamp(0.8125rem, 0.79rem + 0.12vw, 0.9rem);
+  --text-base: clamp(0.9375rem, 0.91rem + 0.15vw, 1.0625rem);
+  --text-md: clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem);
+  --text-lg: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
+  --text-xl: clamp(1.5rem, 1.3rem + 1vw, 2rem);
+  --text-2xl: clamp(1.875rem, 1.5rem + 1.8vw, 2.75rem);
+  --text-3xl: clamp(2.25rem, 1.7rem + 2.6vw, 3.5rem);
+
+  --leading-tight: 1.12;
+  --leading-snug: 1.28;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
+
+  --tracking-tight: -0.022em;
+  --tracking-snug: -0.012em;
+  --tracking-wide: 0.06em;
+
+  /* ── Espaco ──────────────────────────────────────────────────────────── */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 2.5rem;
+  --space-8: 3rem;
+  --space-9: 4rem;
+  --space-10: 5rem;
+  --space-11: 6.5rem;
+  --space-12: 8rem;
+
+  --section-gap: clamp(3.5rem, 2.5rem + 4vw, 6.5rem);
+
+  /* ── Forma ───────────────────────────────────────────────────────────── */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 999px;
+
+  /* ── Layout ──────────────────────────────────────────────────────────── */
+  --container: 1280px;
+  --container-narrow: 960px;
+  --measure: 68ch;
+  --gutter: clamp(1.25rem, 0.9rem + 1.6vw, 2rem);
+  --header-height: 72px;
+
+  /* ── Movimento ───────────────────────────────────────────────────────── */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 140ms;
+  --duration: 240ms;
+  --duration-slow: 420ms;
+
+  --z-header: 60;
+  --z-overlay: 80;
+  --z-toast: 100;
+
+  color-scheme: light;
+}
+
+/* Sem escolha explicita: segue o sistema. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #17181a;
+    --bg-subtle: #1c1e20;
+    --surface: #212421;
+    --surface-hover: #262a26;
+    --text: #f2f2ef;
+    --text-muted: #a9aca6;
+    --text-faint: #8e918a;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.16);
+    --primary: #66bb6a;
+    --primary-strong: #4caf50;
+    --primary-contrast: #0e1a0f;
+    --tint: #1e2a1d;
+    --header-bg: rgba(23, 24, 26, 0.82);
+    --focus: #8fd694;
+    --selection: rgba(102, 187, 106, 0.24);
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+    --shadow-md: 0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 2px 4px rgba(0, 0, 0, 0.4), 0 18px 48px rgba(0, 0, 0, 0.5);
+
+    color-scheme: dark;
+  }
+}
+
+/* Escolha explicita do leitor vence o sistema, nos dois sentidos. */
+:root[data-theme='dark'] {
+  --bg: #17181a;
+  --bg-subtle: #1c1e20;
+  --surface: #212421;
+  --surface-hover: #262a26;
+  --text: #f2f2ef;
+  --text-muted: #a9aca6;
+  --text-faint: #8e918a;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --primary: #66bb6a;
+  --primary-strong: #4caf50;
+  --primary-contrast: #0e1a0f;
+  --tint: #1e2a1d;
+  --header-bg: rgba(23, 24, 26, 0.82);
+  --focus: #8fd694;
+  --selection: rgba(102, 187, 106, 0.24);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 2px 4px rgba(0, 0, 0, 0.4), 0 18px 48px rgba(0, 0, 0, 0.5);
+
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}

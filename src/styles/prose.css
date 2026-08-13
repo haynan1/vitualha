@@ -1,0 +1,302 @@
+/**
+ * Tipografia do corpo do artigo. Medida de ~68 caracteres, ritmo vertical
+ * proporcional ao tamanho do texto e hierarquia que se sustenta sozinha —
+ * o leitor precisa conseguir varrer o artigo sem ler tudo.
+ */
+
+.prose {
+  max-width: var(--measure);
+  font-size: var(--text-md);
+  line-height: var(--leading-relaxed);
+  color: var(--text);
+}
+
+.prose > * + * {
+  margin-block-start: var(--space-5);
+}
+
+/* Paragrafo de abertura com peso editorial. */
+.prose > p:first-of-type {
+  font-size: calc(var(--text-md) * 1.08);
+  color: var(--text);
+}
+
+.prose h2,
+.prose h3,
+.prose h4 {
+  position: relative;
+  scroll-margin-top: calc(var(--header-height) + var(--space-5));
+}
+
+.prose h2 {
+  margin-block-start: var(--space-9);
+  font-size: var(--text-lg);
+  letter-spacing: var(--tracking-snug);
+}
+
+.prose h3 {
+  margin-block-start: var(--space-7);
+  font-size: var(--text-md);
+  font-weight: 700;
+}
+
+.prose h4 {
+  margin-block-start: var(--space-6);
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+/* Ancora de secao: aparece no hover, invisivel para leitor de tela.
+   O simbolo vem daqui, e nao do texto do titulo — ver astro.config.ts. */
+.prose .heading-anchor::after {
+  content: '#';
+}
+
+.prose .heading-anchor {
+  position: absolute;
+  left: -1.1em;
+  width: 1em;
+  color: var(--text-faint);
+  font-weight: 400;
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+  text-decoration: none;
+}
+
+.prose :is(h2, h3, h4):hover .heading-anchor,
+.prose .heading-anchor:focus-visible {
+  opacity: 1;
+}
+
+@media (max-width: 900px) {
+  .prose .heading-anchor {
+    display: none;
+  }
+}
+
+.prose a {
+  color: var(--primary-strong);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  text-decoration-color: color-mix(in srgb, var(--primary) 40%, transparent);
+  transition: text-decoration-color var(--duration-fast) var(--ease-out);
+}
+
+.prose a:hover {
+  text-decoration-color: var(--primary);
+}
+
+:root[data-theme='dark'] .prose a {
+  color: var(--primary);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .prose a {
+    color: var(--primary);
+  }
+}
+
+.prose strong {
+  font-weight: 700;
+}
+
+.prose ul,
+.prose ol {
+  padding-inline-start: var(--space-5);
+}
+
+.prose li + li {
+  margin-block-start: var(--space-2);
+}
+
+.prose ul li::marker {
+  color: var(--primary);
+}
+
+.prose ol li::marker {
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.prose blockquote {
+  margin-inline: 0;
+  padding: var(--space-4) var(--space-5);
+  border-inline-start: 3px solid var(--primary);
+  background: var(--bg-subtle);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  font-size: calc(var(--text-md) * 1.02);
+  color: var(--text-muted);
+}
+
+.prose blockquote p + p {
+  margin-block-start: var(--space-3);
+}
+
+.prose hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin-block: var(--space-8);
+}
+
+.prose img {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.prose figure figcaption {
+  margin-block-start: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* ── Tabelas ────────────────────────────────────────────────────────────── */
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+/* Tabela larga rola dentro do proprio bloco; a pagina nunca rola na horizontal. */
+.prose .table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.prose th,
+.prose td {
+  padding: var(--space-3) var(--space-4);
+  text-align: start;
+  border-bottom: 1px solid var(--border);
+}
+
+.prose thead th {
+  font-family: var(--font-display);
+  font-weight: 700;
+  background: var(--bg-subtle);
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.prose tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ── Codigo ─────────────────────────────────────────────────────────────── */
+
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  padding: 0.15em 0.4em;
+  border-radius: var(--radius-sm);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+}
+
+.prose pre {
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  overflow-x: auto;
+}
+
+.prose pre code {
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+/* Shiki com dois temas: troca as variaveis conforme o tema escolhido. */
+:root[data-theme='dark'] .astro-code,
+:root[data-theme='dark'] .astro-code span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .astro-code,
+  :root:not([data-theme='light']) .astro-code span {
+    color: var(--shiki-dark) !important;
+    background-color: var(--shiki-dark-bg) !important;
+  }
+}
+
+/* ── Callouts (:::dica, :::atencao, :::nota) ────────────────────────────── */
+
+.callout {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-3) var(--space-4);
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-inline-start: 3px solid var(--callout-accent, var(--primary));
+  font-size: var(--text-base);
+}
+
+.callout__icon {
+  grid-row: span 2;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-full);
+  background: var(--callout-tint, var(--tint));
+  color: var(--callout-accent, var(--primary));
+  font-size: 15px;
+  line-height: 1;
+}
+
+.callout__title {
+  align-self: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--callout-accent, var(--primary));
+}
+
+.callout__body > * + * {
+  margin-block-start: var(--space-3);
+}
+
+.callout--dica {
+  --callout-accent: var(--primary);
+  --callout-tint: var(--tint);
+}
+
+.callout--atencao {
+  --callout-accent: #b45309;
+  --callout-tint: rgba(180, 83, 9, 0.12);
+}
+
+.callout--nota {
+  --callout-accent: #1d4ed8;
+  --callout-tint: rgba(29, 78, 216, 0.12);
+}
+
+:root[data-theme='dark'] .callout--atencao {
+  --callout-accent: #fbbf24;
+}
+
+:root[data-theme='dark'] .callout--nota {
+  --callout-accent: #93c5fd;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .callout--atencao {
+    --callout-accent: #fbbf24;
+  }
+
+  :root:not([data-theme='light']) .callout--nota {
+    --callout-accent: #93c5fd;
+  }
+}
