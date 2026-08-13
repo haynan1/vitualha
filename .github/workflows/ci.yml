@@ -1,0 +1,77 @@
+name: CI
+
+# Toda alteracao passa por aqui — inclusive as feitas pelo CMS, que gravam
+# commit direto no repositorio. É a rede que impede um artigo com frontmatter
+# invalido de chegar ao ar.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validar e construir
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      # Acoes pinadas por SHA e nao por tag: tag pode ser movida para outro
+      # commit, SHA nao. É o basico contra comprometimento de dependencia de CI.
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Auditoria de seguranca
+        run: npm audit --audit-level=high
+
+      - name: Formatacao
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Tipos e acessibilidade
+        run: npm run check
+
+      - name: Testes
+        run: npm test
+
+      - name: Build
+        env:
+          # Definido em Settings > Secrets and variables > Actions > Variables.
+          # Sem o valor, o build usaria o dominio padrao do astro.config.ts.
+          PUBLIC_SITE_URL: ${{ vars.PUBLIC_SITE_URL }}
+          PUBLIC_NEWSLETTER_ACTION: ${{ vars.PUBLIC_NEWSLETTER_ACTION }}
+          PUBLIC_NEWSLETTER_FIELD: ${{ vars.PUBLIC_NEWSLETTER_FIELD }}
+          PUBLIC_ANALYTICS_SRC: ${{ vars.PUBLIC_ANALYTICS_SRC }}
+          PUBLIC_ANALYTICS_ID: ${{ vars.PUBLIC_ANALYTICS_ID }}
+          PUBLIC_ADSENSE_CLIENT: ${{ vars.PUBLIC_ADSENSE_CLIENT }}
+          PUBLIC_ADSENSE_SLOT_IN_ARTICLE: ${{ vars.PUBLIC_ADSENSE_SLOT_IN_ARTICLE }}
+          PUBLIC_ADSENSE_SLOT_ARTICLE_END: ${{ vars.PUBLIC_ADSENSE_SLOT_ARTICLE_END }}
+          PUBLIC_ADSENSE_SLOT_SIDEBAR: ${{ vars.PUBLIC_ADSENSE_SLOT_SIDEBAR }}
+          PUBLIC_ADSENSE_SLOT_LISTING: ${{ vars.PUBLIC_ADSENSE_SLOT_LISTING }}
+        run: npm run build
+
+      - name: Guardar o site construido
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: site
+          path: dist/
+          retention-days: 7
+          include-hidden-files: true

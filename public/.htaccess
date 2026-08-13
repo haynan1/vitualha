@@ -1,0 +1,152 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Nutricao em Acao — configuracao do servidor (Hostinger / LiteSpeed / Apache)
+#
+# Este arquivo é copiado para dist/ no build e vai para public_html no deploy.
+# Ele carrega tres responsabilidades: canonizacao de URL, cabecalhos de
+# seguranca e politica de cache.
+# ─────────────────────────────────────────────────────────────────────────────
+
+Options -Indexes
+DirectoryIndex index.html
+ServerSignature Off
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # HTTPS sempre. HTTP_X_FORWARDED_PROTO cobre o proxy da Hostinger; sem essa
+  # condicao o redirect entra em loop atras do proxy.
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+  # Um dominio canonico so: www redireciona para a raiz, casando com o
+  # PUBLIC_SITE_URL usado nas tags canonical.
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
+
+  # O site é gerado com barra final (trailingSlash: 'always'). Requisicoes sem
+  # a barra sao redirecionadas uma unica vez, em vez de servir a mesma pagina
+  # em dois enderecos.
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_URI} !\.[a-zA-Z0-9]{2,5}$
+  RewriteCond %{REQUEST_URI} !/$
+  RewriteRule ^(.*)$ /$1/ [R=301,L]
+</IfModule>
+
+ErrorDocument 404 /404.html
+
+# ── Cabecalhos de seguranca ──────────────────────────────────────────────────
+<IfModule mod_headers.c>
+  # 2 anos, subdominios incluidos. So ative o preload apos confirmar que todos
+  # os subdominios servem HTTPS — a lista de preload é dificil de reverter.
+  Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains"
+
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set X-Frame-Options "DENY"
+  Header always set Cross-Origin-Opener-Policy "same-origin"
+  Header always set Cross-Origin-Resource-Policy "same-origin"
+
+  # O site nao usa camera, microfone, geolocalizacao, pagamento nem sensores.
+  Header always set Permissions-Policy "accelerometer=(), autoplay=(), camera=(), display-capture=(), encrypted-media=(), fullscreen=(self), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), usb=()"
+
+  # Content-Security-Policy
+  #
+  # script-src 'self' sem 'unsafe-inline': o build nao gera nenhum script
+  # inline (o script de tema é um arquivo externo e a verificacao de build
+  # falha se algum inline aparecer). 'wasm-unsafe-eval' é exigido pelo
+  # Pagefind, que roda o indice de busca em WebAssembly.
+  #
+  # style-src aceita 'unsafe-inline' por causa dos atributos style= usados em
+  # gradiente por categoria e no dimensionamento responsivo de imagem. A
+  # fronteira que importa contra XSS é a execucao de script, e essa continua
+  # fechada.
+  #
+  # ── Monetizacao (AdSense) ────────────────────────────────────────────────
+  # Anuncio de terceiro custa politica: os dominios do Google abaixo existem
+  # exclusivamente para o AdSense e para o painel de consentimento
+  # (Privacy & Messaging). Sem monetizacao, apague todas as entradas
+  # googlesyndication/doubleclick/googleadservices/fundingchoices e a
+  # politica volta a ser estritamente 'self'.
+  #
+  # `frame-src` é o que permite o anuncio em si: ele roda dentro de um iframe
+  # de outra origem, isolado do documento. Nenhum script de anuncio executa
+  # no contexto da pagina.
+  #
+  # Se os blocos ficarem em branco depois de tudo configurado, o passo
+  # seguinte é acrescentar 'unsafe-inline' em script-src — o tag do AdSense
+  # ainda escreve script inline em alguns formatos. Isso enfraquece a
+  # protecao contra XSS, entao só faca isso se for realmente necessario, e
+  # registre a decisao.
+  #
+  # Ao ativar newsletter externa, acrescente o host do provedor em form-action.
+  # Ao ativar analytics, acrescente o host em script-src e connect-src.
+  Header always set Content-Security-Policy "default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com https://www.google.com.br; font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'wasm-unsafe-eval' https://pagead2.googlesyndication.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://www.googletagservices.com https://adservice.google.com https://adservice.google.com.br https://fundingchoicesmessages.google.com; connect-src 'self' https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://fundingchoicesmessages.google.com; frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com; manifest-src 'self'; upgrade-insecure-requests"
+</IfModule>
+
+# ── Cache ────────────────────────────────────────────────────────────────────
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresDefault "access plus 1 hour"
+
+  # HTML sempre revalidado: publicar um artigo tem que aparecer na hora.
+  ExpiresByType text/html "access plus 0 seconds"
+
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType image/avif "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType application/xml "access plus 1 hour"
+</IfModule>
+
+<IfModule mod_headers.c>
+  # Nomes com hash: o conteudo nunca muda para uma mesma URL.
+  <FilesMatch "\.(css|js|woff2|avif|webp|png|jpe?g|svg|gif|ico)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+  # Arquivos de caminho fixo mudam sem trocar de nome: precisam revalidar.
+  <FilesMatch "^(theme\.js|ads\.js|favicon\.svg|site\.webmanifest|robots\.txt|sitemap.*\.xml)$">
+    Header set Cache-Control "public, max-age=3600, must-revalidate"
+  </FilesMatch>
+
+  <FilesMatch "\.html$">
+    Header set Cache-Control "public, max-age=0, must-revalidate"
+  </FilesMatch>
+
+  <FilesMatch "\.xml$">
+    Header set Cache-Control "public, max-age=3600"
+  </FilesMatch>
+</IfModule>
+
+# ── Compressao ───────────────────────────────────────────────────────────────
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml
+  AddOutputFilterByType DEFLATE application/javascript application/json
+  AddOutputFilterByType DEFLATE application/xml application/rss+xml
+  AddOutputFilterByType DEFLATE image/svg+xml font/woff2
+</IfModule>
+
+# ── Tipos MIME ───────────────────────────────────────────────────────────────
+<IfModule mod_mime.c>
+  AddType font/woff2 .woff2
+  AddType image/avif .avif
+  AddType image/webp .webp
+  AddType application/manifest+json .webmanifest
+  AddType application/wasm .wasm
+  AddCharset UTF-8 .html .css .js .xml .json .txt
+</IfModule>
+
+# ── Arquivos que nunca devem ser servidos ────────────────────────────────────
+# Qualquer arquivo iniciado por ponto (.env, .git, .htaccess). O build nunca
+# gera .md, .ts ou lock file dentro de dist/, entao bloquear extensao a
+# extensao so criaria risco de derrubar /admin/config.yml ou o indice do
+# Pagefind sem ganho real de seguranca.
+<FilesMatch "^\.">
+  Require all denied
+</FilesMatch>

@@ -1,0 +1,46 @@
+version: 2
+
+# Atualizacao agrupada e semanal: um PR por semana com tudo que é rotina, e
+# PR separado so quando a mudanca exige leitura (major). Dependencia
+# desatualizada é a origem mais comum de vulnerabilidade em projeto estatico.
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: America/Sao_Paulo
+    open-pull-requests-limit: 5
+    groups:
+      astro:
+        patterns:
+          - 'astro'
+          - '@astrojs/*'
+        update-types: [minor, patch]
+      ferramentas:
+        patterns:
+          - 'eslint*'
+          - 'typescript*'
+          - 'prettier*'
+          - 'vitest'
+          - '@eslint/*'
+        update-types: [minor, patch]
+      conteudo:
+        patterns:
+          - 'remark*'
+          - 'rehype*'
+          - 'unist*'
+          - 'pagefind'
+          - '@sveltia/*'
+          - '@fontsource-variable/*'
+        update-types: [minor, patch]
+    commit-message:
+      prefix: 'deps'
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: 'ci'
