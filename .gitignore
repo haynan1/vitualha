@@ -39,3 +39,8 @@ npm-debug.log*
 # Cache de ferramentas
 .eslintcache
 coverage/
+
+# Anotacoes pessoais de configuracao — descrevem o painel e as credenciais de
+# quem mantem o site, nao o projeto. Quem clonar o repositorio encontra o que
+# precisa em README.md e ARCHITECTURE.md.
+PENDENCIAS.md
