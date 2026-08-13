@@ -19,7 +19,7 @@
 
 backend:
   name: github
-  repo: SEU-USUARIO/nutricao_blog # <- troque pelo caminho real do repositorio
+  repo: haynan1/nutricao_blog
   branch: main
 
 # Grava direto no branch (sem pull request). Para revisao antes de publicar,
