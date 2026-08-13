@@ -17,14 +17,24 @@ const { PUBLIC_SITE_URL } = env;
 
 /**
  * `site` is baked into canonicals, hreflang, RSS, sitemap and JSON-LD at build
- * time. It must be the real production origin, so a missing value fails loudly
- * here instead of silently shipping localhost URLs to Google.
+ * time. It must be the real production origin, so a malformed value fails
+ * loudly here instead of silently shipping wrong URLs to Google.
+ *
+ * A barra final é removida, e nao reprovada: "https://x.com/" e "https://x.com"
+ * designam a mesma origem, sem ambiguidade nenhuma, e a barra é justamente o
+ * que o navegador acrescenta sozinho ao copiar da barra de endereco — o
+ * caminho mais provavel do valor ate a caixa de texto do GitHub. Reprovar isso
+ * derruba o deploy sem proteger de nada (ja derrubou).
+ *
+ * Continua reprovando o que muda o significado: esquema que nao seja https,
+ * caminho, porta ou query. Nesses casos nao da para adivinhar a intencao, e
+ * publicar um canonical errado é pior do que nao publicar.
  */
-const site = PUBLIC_SITE_URL?.trim() || 'https://vitualha.com';
+const site = (PUBLIC_SITE_URL?.trim() || 'https://vitualha.com').replace(/\/+$/, '');
 
-if (!/^https:\/\/[^/]+$/.test(site)) {
+if (!/^https:\/\/[^/?#]+$/.test(site)) {
   throw new Error(
-    `PUBLIC_SITE_URL invalido: "${site}". Use a origem https sem barra final, ex: https://vitualha.com`,
+    `PUBLIC_SITE_URL invalido: "${PUBLIC_SITE_URL}". Use apenas a origem https, ex: https://vitualha.com`,
   );
 }
 
