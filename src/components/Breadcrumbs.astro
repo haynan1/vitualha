@@ -1,0 +1,69 @@
+---
+import type { Locale } from '@/i18n/locales';
+import { t } from '@/i18n/ui';
+import type { Crumb } from '@/lib/navigation';
+
+type Props = { locale: Locale; trail: Crumb[] };
+
+const { locale, trail } = Astro.props;
+const ui = t(locale);
+---
+
+<nav class="crumbs" aria-label={ui.breadcrumb.label}>
+  <ol class="crumbs__list">
+    {
+      trail.map((crumb, index) => {
+        const isLast = index === trail.length - 1;
+
+        return (
+          <li class="crumbs__item">
+            {isLast ? (
+              <span aria-current="page">{crumb.name}</span>
+            ) : (
+              <a href={crumb.url}>{crumb.name}</a>
+            )}
+            {!isLast && (
+              <span class="crumbs__sep" aria-hidden="true">
+                /
+              </span>
+            )}
+          </li>
+        );
+      })
+    }
+  </ol>
+</nav>
+
+<style>
+  .crumbs__list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    list-style: none;
+    padding: 0;
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+
+  .crumbs__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .crumbs__item a:hover {
+    color: var(--primary);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .crumbs__item [aria-current='page'] {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .crumbs__sep {
+    color: var(--text-faint);
+  }
+</style>

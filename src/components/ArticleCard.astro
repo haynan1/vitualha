@@ -1,0 +1,143 @@
+---
+import CoverImage from '@/components/CoverImage.astro';
+import { CATEGORIES } from '@/config/categories';
+import { categoryUrl } from '@/i18n/routes';
+import { t } from '@/i18n/ui';
+import type { Article } from '@/lib/articles';
+import { formatDate, isoDate } from '@/lib/date';
+
+type Props = {
+  article: Article;
+  /** Nivel do titulo no documento — mantem a hierarquia correta da pagina. */
+  headingLevel?: 2 | 3;
+  eager?: boolean;
+};
+
+const { article, headingLevel = 3, eager = false } = Astro.props;
+const { locale, url, minutes, entry } = article;
+const data = entry.data;
+const ui = t(locale);
+const category = CATEGORIES[data.category][locale];
+const Heading = `h${headingLevel}` as const;
+---
+
+<article class="card">
+  {
+    /* A capa nao é um segundo link: o titulo cobre o cartao inteiro (::after),
+      entao existe um unico destino anunciado pelo leitor de tela. */
+  }
+  <div class="card__media">
+    <CoverImage
+      article={article}
+      sizes="(min-width: 1080px) 380px, (min-width: 640px) 45vw, 92vw"
+      widths={[320, 480, 760]}
+      eager={eager}
+    />
+  </div>
+
+  <div class="card__body">
+    <div class="card__meta">
+      <a class="badge" href={categoryUrl(locale, category.slug)}>{category.name}</a>
+      {data.draft && <span class="badge badge--draft">draft</span>}
+    </div>
+
+    <Heading class="card__title">
+      <a href={url}>{data.title}</a>
+    </Heading>
+
+    <p class="card__summary">{data.summary}</p>
+
+    <p class="card__footer">
+      <time datetime={isoDate(data.publishedAt)}>{formatDate(data.publishedAt, locale)}</time>
+      <span aria-hidden="true">·</span>
+      <span>{minutes} {ui.article.readTime}</span>
+    </p>
+  </div>
+</article>
+
+<style>
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    height: 100%;
+  }
+
+  .card__media {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  /* A imagem responde ao hover do cartao inteiro, nao so ao dela. */
+  .card:hover :global(.cover__img) {
+    transform: scale(1.03);
+  }
+
+  .card__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    flex: 1;
+  }
+
+  .card__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  .card__title {
+    font-size: var(--text-md);
+    font-weight: 800;
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-snug);
+  }
+
+  .card__title a {
+    /* O link do titulo cobre o cartao — area de clique inteira, um unico link
+       anunciado pelo leitor de tela. */
+    background-image: linear-gradient(var(--primary), var(--primary));
+    background-size: 0% 1.5px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size var(--duration) var(--ease-out);
+  }
+
+  .card__title a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .card:hover .card__title a {
+    background-size: 100% 1.5px;
+  }
+
+  .card__summary {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card__footer {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-block-start: auto;
+    color: var(--text-faint);
+    font-size: var(--text-xs);
+  }
+
+  /* A etiqueta de categoria fica acima da area clicavel do titulo. */
+  .card__meta .badge {
+    position: relative;
+    z-index: 1;
+  }
+</style>

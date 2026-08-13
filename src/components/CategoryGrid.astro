@@ -1,0 +1,99 @@
+---
+import { CATEGORY_LIST } from '@/config/categories';
+import type { Locale } from '@/i18n/locales';
+import { categoryUrl } from '@/i18n/routes';
+
+type Props = { locale: Locale };
+
+const { locale } = Astro.props;
+---
+
+<ul class="categories">
+  {
+    CATEGORY_LIST.map((category) => {
+      const copy = category[locale];
+
+      return (
+        <li class="categories__item" style={`--hue: ${category.hue};`}>
+          <a class="categories__link" href={categoryUrl(locale, copy.slug)}>
+            <span class="categories__letter" aria-hidden="true">
+              {category.letter}
+            </span>
+            <span class="categories__name">{copy.name}</span>
+            <span class="categories__desc">{copy.description}</span>
+          </a>
+        </li>
+      );
+    })
+  }
+</ul>
+
+<style>
+  .categories {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+    list-style: none;
+    padding: 0;
+  }
+
+  .categories__link {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    gap: 0.25rem var(--space-4);
+    height: 100%;
+    padding: var(--space-5);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition:
+      border-color var(--duration) var(--ease-out),
+      transform var(--duration) var(--ease-out),
+      box-shadow var(--duration) var(--ease-out);
+  }
+
+  .categories__link:hover {
+    transform: translateY(-3px);
+    border-color: transparent;
+    box-shadow: var(--shadow-md);
+  }
+
+  .categories__letter {
+    grid-row: span 2;
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-md);
+    background: hsl(var(--hue) 40% 42% / 0.14);
+    color: hsl(var(--hue) 46% 34%);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.05rem;
+  }
+
+  :global(:root[data-theme='dark']) .categories__letter {
+    color: hsl(var(--hue) 52% 68%);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .categories__letter {
+      color: hsl(var(--hue) 52% 68%);
+    }
+  }
+
+  .categories__name {
+    align-self: end;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: var(--text-base);
+    letter-spacing: var(--tracking-snug);
+  }
+
+  .categories__desc {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    line-height: var(--leading-snug);
+  }
+</style>

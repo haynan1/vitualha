@@ -1,0 +1,88 @@
+---
+import type { Locale } from '@/i18n/locales';
+import { t } from '@/i18n/ui';
+
+type Reference = { title: string; url: string; publisher?: string | undefined };
+
+type Props = { locale: Locale; references: Reference[] };
+
+const { locale, references } = Astro.props;
+const ui = t(locale);
+---
+
+{
+  references.length > 0 && (
+    <section class="refs" aria-labelledby="refs-title">
+      <h2 class="refs__title" id="refs-title">
+        {ui.article.referencesTitle}
+      </h2>
+
+      <ol class="refs__list">
+        {references.map((reference) => (
+          <li class="refs__item">
+            {/* rel="noopener" sem nofollow: citacao cientifica é referencia
+                real, e nao link patrocinado. */}
+            <a class="refs__link" href={reference.url} target="_blank" rel="noopener noreferrer">
+              {reference.title}
+            </a>
+            {reference.publisher && <span class="refs__publisher">{reference.publisher}</span>}
+          </li>
+        ))}
+      </ol>
+    </section>
+  )
+}
+
+<style>
+  .refs {
+    padding: var(--space-6);
+    border-radius: var(--radius-lg);
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+  }
+
+  .refs__title {
+    font-size: var(--text-base);
+  }
+
+  .refs__list {
+    margin-block-start: var(--space-4);
+    display: grid;
+    gap: var(--space-3);
+    padding-inline-start: var(--space-5);
+  }
+
+  .refs__item::marker {
+    color: var(--text-faint);
+    font-size: var(--text-sm);
+  }
+
+  .refs__link {
+    color: var(--primary-strong);
+    font-size: var(--text-sm);
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+    text-decoration-color: color-mix(in srgb, var(--primary) 40%, transparent);
+  }
+
+  .refs__link:hover {
+    text-decoration-color: var(--primary);
+  }
+
+  :global(:root[data-theme='dark']) .refs__link {
+    color: var(--primary);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .refs__link {
+      color: var(--primary);
+    }
+  }
+
+  .refs__publisher {
+    display: block;
+    color: var(--text-faint);
+    font-size: var(--text-xs);
+    margin-block-start: 0.15rem;
+  }
+</style>

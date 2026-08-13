@@ -1,0 +1,92 @@
+---
+import type { Locale } from '@/i18n/locales';
+import { t } from '@/i18n/ui';
+
+type Props = { locale: Locale; items: Array<{ question: string; answer: string }> };
+
+const { locale, items } = Astro.props;
+const ui = t(locale);
+---
+
+{
+  items.length > 0 && (
+    <section class="faq" aria-labelledby="faq-title">
+      <h2 class="faq__title" id="faq-title">
+        {ui.article.faqTitle}
+      </h2>
+
+      <div class="faq__list">
+        {items.map((item) => (
+          /* <details> nativo: acessivel, pesquisavel pelo Ctrl+F do navegador
+             e sem depender de JavaScript. */
+          <details class="faq__item">
+            <summary class="faq__question">{item.question}</summary>
+            <p class="faq__answer">{item.answer}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .faq__title {
+    font-size: var(--text-lg);
+  }
+
+  .faq__list {
+    margin-block-start: var(--space-5);
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .faq__item {
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: border-color var(--duration-fast) var(--ease-out);
+  }
+
+  .faq__item[open] {
+    border-color: var(--border-strong);
+  }
+
+  .faq__question {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    cursor: pointer;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-base);
+    list-style: none;
+  }
+
+  .faq__question::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq__question::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    flex-shrink: 0;
+    border-right: 2px solid var(--primary);
+    border-bottom: 2px solid var(--primary);
+    transform: rotate(45deg) translate(-2px, -2px);
+    transition: transform var(--duration) var(--ease-out);
+  }
+
+  .faq__item[open] .faq__question::after {
+    transform: rotate(225deg) translate(-2px, -2px);
+  }
+
+  .faq__answer {
+    margin-block-start: var(--space-3);
+    color: var(--text-muted);
+    line-height: var(--leading-relaxed);
+    font-size: var(--text-sm);
+  }
+</style>

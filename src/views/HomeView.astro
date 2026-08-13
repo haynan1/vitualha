@@ -1,0 +1,106 @@
+---
+import AdSlot from '@/components/AdSlot.astro';
+import ArticleGrid from '@/components/ArticleGrid.astro';
+import CategoryGrid from '@/components/CategoryGrid.astro';
+import HeroArticle from '@/components/HeroArticle.astro';
+import Newsletter from '@/components/Newsletter.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+import { LOCALES, type Locale } from '@/i18n/locales';
+import { articlesUrl, homeUrl } from '@/i18n/routes';
+import { t } from '@/i18n/ui';
+import { getHome } from '@/lib/articles';
+
+type Props = { locale: Locale };
+
+const { locale } = Astro.props;
+const ui = t(locale);
+const { hero, featured, latest, hasMore } = await getHome(locale);
+
+const localeUrls = Object.fromEntries(LOCALES.map((option) => [option, homeUrl(option)])) as Record<
+  Locale,
+  string
+>;
+---
+
+<BaseLayout
+  title={ui.meta.homeTitle}
+  description={ui.meta.homeDescription}
+  locale={locale}
+  localeUrls={localeUrls}
+  ads="listing"
+>
+  <div class="container">
+    {hero ? <HeroArticle article={hero} /> : <p class="empty">{ui.home.empty}</p>}
+  </div>
+
+  {
+    featured.length > 0 && (
+      <section class="section" aria-labelledby="featured-title">
+        <div class="container">
+          <div class="section-head">
+            <h2 class="section-title" id="featured-title">
+              {ui.home.featuredTitle}
+            </h2>
+          </div>
+          <ArticleGrid articles={featured} />
+        </div>
+      </section>
+    )
+  }
+
+  <section class="section" aria-labelledby="categories-title">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2 class="section-title" id="categories-title">{ui.home.categoriesTitle}</h2>
+          <p class="section-subtitle">{ui.home.categoriesSubtitle}</p>
+        </div>
+      </div>
+      <CategoryGrid locale={locale} />
+    </div>
+  </section>
+
+  <div class="container">
+    <AdSlot name="listing" locale={locale} minHeight={300} />
+  </div>
+
+  {
+    latest.length > 0 && (
+      <section class="section" aria-labelledby="latest-title">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title" id="latest-title">
+                {ui.home.latestTitle}
+              </h2>
+              <p class="section-subtitle">{ui.home.latestSubtitle}</p>
+            </div>
+
+            {hasMore && (
+              <a class="btn btn--ghost" href={articlesUrl(locale)}>
+                {ui.home.viewAllBtn}
+              </a>
+            )}
+          </div>
+
+          <ArticleGrid articles={latest} />
+        </div>
+      </section>
+    )
+  }
+
+  <section class="section">
+    <div class="container">
+      <Newsletter locale={locale} />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .empty {
+    padding: var(--space-11) var(--space-6);
+    text-align: center;
+    color: var(--text-muted);
+  }
+</style>

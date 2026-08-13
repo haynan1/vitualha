@@ -1,0 +1,329 @@
+---
+import type { MarkdownHeading } from 'astro';
+
+import AdSlot from '@/components/AdSlot.astro';
+import ArticleGrid from '@/components/ArticleGrid.astro';
+import AuthorCard from '@/components/AuthorCard.astro';
+import BackToTop from '@/components/BackToTop.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import CoverImage from '@/components/CoverImage.astro';
+import Faq from '@/components/Faq.astro';
+import Newsletter from '@/components/Newsletter.astro';
+import Notice from '@/components/Notice.astro';
+import References from '@/components/References.astro';
+import ShareBar from '@/components/ShareBar.astro';
+import TableOfContents from '@/components/TableOfContents.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+import { CATEGORIES } from '@/config/categories';
+import { LOCALE_TAG, type Locale } from '@/i18n/locales';
+import { categoryUrl } from '@/i18n/routes';
+import { t } from '@/i18n/ui';
+import type { Article, AuthorEntry } from '@/lib/articles';
+import type { Crumb } from '@/lib/navigation';
+import { formatDate, isoDate } from '@/lib/date';
+import { absolute } from '@/lib/seo';
+
+import '@/styles/prose.css';
+
+type Props = {
+  article: Article;
+  /** Ausente em artigo sem assinatura pessoal — a prova fica nas referencias. */
+  author?: AuthorEntry | undefined;
+  reviewer?: AuthorEntry | undefined;
+  related: Article[];
+  headings: MarkdownHeading[];
+  trail: Crumb[];
+  localeUrls: Record<Locale, string>;
+  alternates: Partial<Record<Locale, string>>;
+  schema: unknown[];
+  /** URL absoluta da capa, quando existir, para og:image. */
+  socialImage?: string | undefined;
+};
+
+const {
+  article,
+  author,
+  reviewer,
+  related,
+  headings,
+  trail,
+  localeUrls,
+  alternates,
+  schema,
+  socialImage,
+} = Astro.props;
+
+const { locale, contentLocale, isFallback, entry, minutes } = article;
+const data = entry.data;
+const ui = t(locale);
+const category = CATEGORIES[data.category][locale];
+const shareUrl = absolute(Astro.url.pathname, Astro.site);
+
+/**
+ * Pagina de fallback exibe o texto original: o canonical aponta para a URL
+ * do idioma em que o artigo foi escrito, para as duas nao competirem entre si
+ * como conteudo duplicado.
+ */
+const canonical = isFallback ? absolute(localeUrls[contentLocale], Astro.site) : undefined;
+---
+
+<BaseLayout
+  title={data.title}
+  description={data.summary}
+  locale={locale}
+  localeUrls={localeUrls}
+  alternates={alternates}
+  image={socialImage}
+  imageAlt={data.coverAlt}
+  type="article"
+  noindex={data.noindex}
+  canonical={canonical}
+  schema={schema}
+  ads="article"
+>
+  <BackToTop locale={locale} />
+
+  <div class="shell container">
+    <div class="shell__top" data-pagefind-ignore>
+      <Breadcrumbs locale={locale} trail={trail} />
+    </div>
+
+    {
+      /* data-pagefind-body: so o artigo entra no indice de busca. Cabecalho,
+        rodape e blocos auxiliares ficam de fora e nao poluem os resultados. */
+    }
+    <article class="article" data-pagefind-body>
+      <header class="article__head">
+        <p class="article__category">
+          <a class="badge" href={categoryUrl(locale, category.slug)}>{category.name}</a>
+          {data.draft && <span class="badge badge--draft">draft</span>}
+        </p>
+
+        <h1 class="article__title">{data.title}</h1>
+        <p class="article__lead">{data.summary}</p>
+
+        <div class="article__byline">
+          {author && <AuthorCard author={author} locale={locale} compact />}
+
+          <p class="article__dates">
+            {
+              /* Texto montado em template literal: entre duas expressoes vizinhas
+                a quebra de linha do JSX some, e o rotulo colaria na data. */
+            }
+            <time datetime={isoDate(data.publishedAt)}>
+              {`${ui.article.publishedLabel} ${formatDate(data.publishedAt, locale)}`}
+            </time>
+            {
+              data.updatedAt && (
+                <time datetime={isoDate(data.updatedAt)}>
+                  {`${ui.article.updatedLabel} ${formatDate(data.updatedAt, locale)}`}
+                </time>
+              )
+            }
+            <span>{`${minutes} ${ui.article.readTime}`}</span>
+          </p>
+        </div>
+      </header>
+
+      {
+        /**
+         * Sem capa real, o artigo abre direto no texto. Um bloco decorativo
+         * de tela cheia no lugar de uma foto que nao existe só empurraria o
+         * conteudo para baixo — nos cards o gradiente faz sentido, aqui nao.
+         */
+        data.cover && (
+          <div class="article__cover">
+            <CoverImage
+              article={article}
+              sizes="(min-width: 1080px) 1000px, 94vw"
+              widths={[640, 960, 1440]}
+              eager
+              ratio="16 / 9"
+            />
+          </div>
+        )
+      }
+
+      {
+        isFallback && (
+          <div class="article__notice" data-pagefind-ignore>
+            <Notice>{ui.article.noTranslationNotice}</Notice>
+          </div>
+        )
+      }
+
+      <div class="article__layout">
+        <aside class="article__aside" data-pagefind-ignore>
+          <TableOfContents locale={locale} headings={headings} />
+          <div class="article__aside-share">
+            <ShareBar locale={locale} url={shareUrl} title={data.title} />
+          </div>
+
+          <AdSlot name="sidebar" locale={locale} minHeight={620} format="auto" />
+        </aside>
+
+        <div class="prose" lang={LOCALE_TAG[contentLocale]}>
+          <slot />
+        </div>
+      </div>
+    </article>
+
+    <div class="shell__after" data-pagefind-ignore>
+      {
+        /* Fim da leitura: o leitor terminou o texto, é o momento de menor
+          interrupcao para um anuncio. */
+      }
+      <AdSlot name="articleEnd" locale={locale} minHeight={300} />
+
+      {data.faq.length > 0 && <Faq locale={locale} items={data.faq} />}
+
+      <References locale={locale} references={data.references} />
+
+      <Notice tone="medical">{ui.article.medicalDisclaimer}</Notice>
+
+      {
+        /* Sem autor nem revisor o bloco inteiro sai: um grid vazio ainda
+          ocuparia o espaco entre o aviso medico e o compartilhamento. */
+        (author ?? reviewer) && (
+          <div class="shell__authors">
+            {author && <AuthorCard author={author} locale={locale} />}
+            {reviewer && (
+              <AuthorCard author={reviewer} locale={locale} label={ui.article.reviewedBy} />
+            )}
+          </div>
+        )
+      }
+
+      <div class="shell__share">
+        <ShareBar locale={locale} url={shareUrl} title={data.title} />
+      </div>
+
+      {
+        related.length > 0 && (
+          <section class="shell__related" aria-labelledby="related-title">
+            <h2 class="section-title" id="related-title">
+              {ui.article.relatedTitle}
+            </h2>
+            <div class="shell__related-grid">
+              <ArticleGrid articles={related} />
+            </div>
+          </section>
+        )
+      }
+
+      <Newsletter locale={locale} />
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .shell {
+    position: relative;
+    padding-block-start: var(--space-6);
+  }
+
+  .shell__top {
+    margin-block-end: var(--space-6);
+  }
+
+  .article__head {
+    max-width: 46rem;
+  }
+
+  .article__category {
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .article__title {
+    margin-block-start: var(--space-4);
+    font-size: var(--text-2xl);
+  }
+
+  .article__lead {
+    margin-block-start: var(--space-5);
+    color: var(--text-muted);
+    font-size: var(--text-md);
+    line-height: var(--leading-relaxed);
+  }
+
+  .article__byline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-block-start: var(--space-6);
+    padding-block-start: var(--space-5);
+    border-top: 1px solid var(--border);
+  }
+
+  .article__dates {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-4);
+    color: var(--text-faint);
+    font-size: var(--text-xs);
+  }
+
+  .article__cover {
+    margin-block-start: var(--space-7);
+  }
+
+  .article__notice {
+    margin-block-start: var(--space-6);
+    max-width: var(--measure);
+  }
+
+  .article__layout {
+    display: grid;
+    gap: var(--space-8);
+    margin-block-start: var(--space-8);
+  }
+
+  .article__aside {
+    display: grid;
+    gap: var(--space-5);
+    align-content: start;
+  }
+
+  .article__aside-share {
+    display: none;
+  }
+
+  .shell__after {
+    display: grid;
+    gap: var(--space-8);
+    margin-block-start: var(--space-9);
+    max-width: var(--container-narrow);
+  }
+
+  .shell__authors {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .shell__related-grid {
+    margin-block-start: var(--space-6);
+  }
+
+  @media (min-width: 1080px) {
+    .article__layout {
+      /* Sumario no rail esquerdo; o texto mantem a medida de leitura ideal
+         em vez de esticar ate a borda do container. */
+      grid-template-columns: 260px minmax(0, var(--measure));
+      gap: var(--space-9);
+      align-items: start;
+    }
+
+    .article__aside {
+      position: sticky;
+      top: calc(var(--header-height) + var(--space-5));
+    }
+
+    .article__aside-share {
+      display: block;
+    }
+  }
+</style>

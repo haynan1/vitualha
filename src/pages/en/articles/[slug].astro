@@ -1,0 +1,26 @@
+---
+import type { GetStaticPaths } from 'astro';
+
+import { getArticles, type Article } from '@/lib/articles';
+import ArticleView from '@/views/ArticleView.astro';
+
+/**
+ * Inclui tambem os artigos ainda sem traducao: a versao em portugues é
+ * publicada nesta URL com aviso e canonical apontando para o original,
+ * em vez de deixar um buraco de 404 no idioma.
+ */
+export const getStaticPaths: GetStaticPaths = async () => {
+  const articles = await getArticles('en');
+
+  return articles.map((article) => ({
+    params: { slug: article.slug },
+    props: { article },
+  }));
+};
+
+type Props = { article: Article };
+
+const { article } = Astro.props;
+---
+
+<ArticleView article={article} />

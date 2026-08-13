@@ -1,0 +1,159 @@
+---
+import Logo from '@/components/Logo.astro';
+import { SITE } from '@/config/site';
+import type { Locale } from '@/i18n/locales';
+import { homeUrl } from '@/i18n/routes';
+import { t } from '@/i18n/ui';
+import { footerColumns } from '@/lib/navigation';
+
+type Props = { locale: Locale };
+
+const { locale } = Astro.props;
+const ui = t(locale);
+const columns = footerColumns(locale);
+const rssPath = locale === 'pt' ? '/rss.xml' : '/en/rss.xml';
+const year = new Date().getFullYear();
+
+const socials = Object.entries(SITE.social).filter(([, url]) => Boolean(url)) as Array<
+  [string, string]
+>;
+---
+
+<footer class="footer">
+  <div class="container footer__inner">
+    <div class="footer__brand">
+      <a href={homeUrl(locale)} aria-label={ui.nav.home}>
+        <Logo />
+      </a>
+      <p class="footer__desc">{ui.footer.brandDesc}</p>
+
+      <div class="footer__links">
+        <a class="footer__rss" href={rssPath}>{ui.footer.rss}</a>
+        {
+          socials.map(([name, url]) => (
+            <a class="footer__rss" href={url} rel="me noopener" target="_blank">
+              {name}
+            </a>
+          ))
+        }
+      </div>
+    </div>
+
+    {
+      columns.map((column) => (
+        <nav class="footer__column" aria-label={column.heading}>
+          <h2 class="footer__heading">{column.heading}</h2>
+          <ul class="footer__list">
+            {column.items.map((item) => (
+              <li>
+                <a class="footer__link" href={item.href}>
+                  {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      ))
+    }
+  </div>
+
+  <div class="container footer__legal">
+    <p class="footer__disclaimer">{ui.footer.disclaimer}</p>
+    <p class="footer__copy">© {year} {SITE.name} — {ui.footer.copyright}</p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    margin-block-start: var(--section-gap);
+    padding-block-start: var(--space-9);
+    border-top: 1px solid var(--border);
+    background: var(--bg-subtle);
+  }
+
+  .footer__inner {
+    display: grid;
+    gap: var(--space-8) var(--space-6);
+    grid-template-columns: 1fr;
+  }
+
+  .footer__desc {
+    margin-block-start: var(--space-4);
+    max-width: 34ch;
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+  }
+
+  .footer__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    margin-block-start: var(--space-4);
+  }
+
+  .footer__rss {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-sm);
+    color: var(--primary);
+    text-transform: capitalize;
+  }
+
+  .footer__rss:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .footer__heading {
+    font-size: var(--text-sm);
+    font-weight: 800;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  .footer__list {
+    list-style: none;
+    padding: 0;
+    margin-block-start: var(--space-4);
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .footer__link {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+
+  .footer__link:hover {
+    color: var(--primary);
+  }
+
+  .footer__legal {
+    margin-block-start: var(--space-9);
+    padding-block: var(--space-6);
+    border-top: 1px solid var(--border);
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .footer__disclaimer {
+    max-width: 88ch;
+    color: var(--text-faint);
+    font-size: var(--text-xs);
+    line-height: var(--leading-relaxed);
+  }
+
+  .footer__copy {
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+  }
+
+  @media (min-width: 720px) {
+    .footer__inner {
+      grid-template-columns: 1.4fr repeat(3, 1fr);
+    }
+  }
+</style>

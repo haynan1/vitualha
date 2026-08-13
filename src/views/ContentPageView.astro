@@ -1,0 +1,104 @@
+---
+import { getEntry, render } from 'astro:content';
+
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+import { LOCALES, type Locale } from '@/i18n/locales';
+import { homeUrl, route, type ContentPageKey } from '@/i18n/routes';
+import { t } from '@/i18n/ui';
+import { formatDate, isoDate } from '@/lib/date';
+import type { Crumb } from '@/lib/navigation';
+import { breadcrumbSchema } from '@/lib/seo';
+
+import '@/styles/prose.css';
+
+type Props = { locale: Locale; pageKey: ContentPageKey };
+
+const { locale, pageKey } = Astro.props;
+const ui = t(locale);
+
+const entry = await getEntry('pages', `${locale}/${pageKey}`);
+
+/**
+ * Pagina institucional faltando em um idioma é erro de conteudo, nao caso a
+ * tratar em producao: o build para aqui com a mensagem exata do que criar.
+ */
+if (!entry) {
+  throw new Error(
+    `Pagina "${pageKey}" nao existe em "${locale}". Crie src/content/pages/${locale}/${pageKey}.md`,
+  );
+}
+
+const { Content } = await render(entry);
+
+const localeUrls = Object.fromEntries(
+  LOCALES.map((option) => [option, route(option, pageKey)]),
+) as Record<Locale, string>;
+
+const trail: Crumb[] = [
+  { name: ui.breadcrumb.home, url: homeUrl(locale) },
+  { name: entry.data.title, url: route(locale, pageKey) },
+];
+---
+
+<BaseLayout
+  title={entry.data.title}
+  description={entry.data.description}
+  locale={locale}
+  localeUrls={localeUrls}
+  noindex={entry.data.noindex}
+  schema={[breadcrumbSchema(trail, Astro.site)]}
+>
+  <div class="container page">
+    <Breadcrumbs locale={locale} trail={trail} />
+
+    <header class="page__head">
+      <h1 class="page__title">{entry.data.title}</h1>
+      <p class="page__desc">{entry.data.description}</p>
+      {
+        entry.data.updatedAt && (
+          <p class="page__updated">
+            <time datetime={isoDate(entry.data.updatedAt)}>
+              {ui.article.updatedLabel} {formatDate(entry.data.updatedAt, locale)}
+            </time>
+          </p>
+        )
+      }
+    </header>
+
+    <div class="prose">
+      <Content />
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    padding-block: var(--space-6) var(--space-9);
+  }
+
+  .page__head {
+    max-width: var(--measure);
+    margin-block: var(--space-6) var(--space-8);
+    padding-block-end: var(--space-6);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .page__title {
+    font-size: var(--text-2xl);
+  }
+
+  .page__desc {
+    margin-block-start: var(--space-4);
+    color: var(--text-muted);
+    font-size: var(--text-md);
+    line-height: var(--leading-relaxed);
+  }
+
+  .page__updated {
+    margin-block-start: var(--space-4);
+    color: var(--text-faint);
+    font-size: var(--text-xs);
+  }
+</style>

@@ -1,0 +1,89 @@
+---
+import BaseHead from '@/components/BaseHead.astro';
+import Footer from '@/components/Footer.astro';
+import Header from '@/components/Header.astro';
+import type { AdSurface } from '@/config/ads';
+import { SITE } from '@/config/site';
+import { LOCALE_TAG, type Locale } from '@/i18n/locales';
+import { t } from '@/i18n/ui';
+
+import '@/styles/global.css';
+
+type Props = {
+  title: string;
+  description: string;
+  locale: Locale;
+  /** Endereco desta pagina em cada idioma — alimenta o seletor de idioma. */
+  localeUrls: Record<Locale, string>;
+  /**
+   * Versoes realmente traduzidas, para hreflang. Padrao: localeUrls. Paginas
+   * de fallback passam so o idioma que existe de verdade.
+   */
+  alternates?: Partial<Record<Locale, string>>;
+  image?: string | undefined;
+  imageAlt?: string | undefined;
+  type?: 'website' | 'article';
+  noindex?: boolean;
+  /** Canonical explicito (paginas de fallback de idioma). */
+  canonical?: string | undefined;
+  schema?: unknown[];
+  /** Acrescenta o sufixo da marca ao <title>. Desligue em paginas de campanha. */
+  brandedTitle?: boolean;
+  /**
+   * Tipo de pagina para a monetizacao — é o que autoriza o script do AdSense
+   * neste documento. Omitir é a opcao correta para qualquer pagina sem bloco
+   * de anuncio: institucionais, busca e 404 nao devem nem carregar o script.
+   */
+  ads?: AdSurface | undefined;
+};
+
+const {
+  title,
+  description,
+  locale,
+  localeUrls,
+  alternates,
+  image,
+  imageAlt,
+  type = 'website',
+  noindex = false,
+  canonical,
+  schema = [],
+  brandedTitle = true,
+  ads,
+} = Astro.props;
+
+const ui = t(locale);
+const documentTitle = brandedTitle ? `${title} — ${SITE.name}` : title;
+---
+
+<!doctype html>
+<html lang={LOCALE_TAG[locale]}>
+  <head>
+    <BaseHead
+      title={documentTitle}
+      description={description}
+      locale={locale}
+      alternates={alternates ?? localeUrls}
+      image={image}
+      imageAlt={imageAlt}
+      type={type}
+      noindex={noindex}
+      canonical={canonical}
+      schema={schema}
+      ads={ads}
+    />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#conteudo">{ui.nav.skipToContent}</a>
+
+    <Header locale={locale} localeUrls={localeUrls} />
+
+    <main id="conteudo">
+      <slot />
+    </main>
+
+    <Footer locale={locale} />
+  </body>
+</html>

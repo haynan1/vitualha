@@ -1,0 +1,93 @@
+---
+import type { Locale } from '@/i18n/locales';
+import { t } from '@/i18n/ui';
+
+type Props = { locale: Locale };
+
+const { locale } = Astro.props;
+const ui = t(locale);
+---
+
+<div class="sentinel" data-top-sentinel aria-hidden="true"></div>
+
+<a class="to-top" href="#conteudo" data-to-top aria-label={ui.article.backToTop}>
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2.2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M12 19V5M6 11l6-6 6 6"></path>
+  </svg>
+</a>
+
+<style>
+  .sentinel {
+    position: absolute;
+    top: 0;
+    height: 1px;
+    width: 1px;
+  }
+
+  .to-top {
+    position: fixed;
+    right: clamp(1rem, 0.4rem + 1.6vw, 2rem);
+    bottom: clamp(1rem, 0.4rem + 1.6vw, 2rem);
+    z-index: var(--z-overlay);
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-full);
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+    opacity: 0;
+    transform: translateY(12px);
+    pointer-events: none;
+    transition:
+      opacity var(--duration) var(--ease-out),
+      transform var(--duration) var(--ease-out),
+      background-color var(--duration-fast) var(--ease-out);
+  }
+
+  .to-top[data-visible] {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .to-top:hover {
+    background: var(--tint);
+  }
+
+  .to-top svg {
+    width: 18px;
+    height: 18px;
+  }
+</style>
+
+<script>
+  /**
+   * Aparece quando o topo sai da tela. Usa IntersectionObserver em vez de
+   * escutar `scroll`: nao roda a cada pixel rolado, entao nao disputa o
+   * thread principal durante a leitura.
+   */
+  const sentinel = document.querySelector('[data-top-sentinel]');
+  const button = document.querySelector<HTMLElement>('[data-to-top]');
+
+  if (sentinel && button && 'IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) button.removeAttribute('data-visible');
+        else button.setAttribute('data-visible', '');
+      }
+    });
+
+    observer.observe(sentinel);
+  }
+</script>

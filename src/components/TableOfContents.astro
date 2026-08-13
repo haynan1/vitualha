@@ -1,0 +1,155 @@
+---
+import type { MarkdownHeading } from 'astro';
+
+import type { Locale } from '@/i18n/locales';
+import { t } from '@/i18n/ui';
+
+type Props = { locale: Locale; headings: MarkdownHeading[] };
+
+const { locale, headings } = Astro.props;
+const ui = t(locale);
+
+/**
+ * So h2 e h3 entram no indice: h1 é o titulo do artigo e h4+ é detalhe
+ * interno. Um sumario com tudo dentro deixa de ser um mapa.
+ */
+const items = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+---
+
+{
+  items.length >= 3 && (
+    <nav class="toc" aria-labelledby="toc-title" data-toc>
+      <h2 class="toc__title" id="toc-title">
+        {ui.article.tocTitle}
+      </h2>
+      <ol class="toc__list">
+        {items.map((heading) => (
+          <li class:list={['toc__item', heading.depth === 3 && 'toc__item--nested']}>
+            <a class="toc__link" href={`#${heading.slug}`} data-toc-link={heading.slug}>
+              {heading.text}
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  )
+}
+
+<style>
+  .toc {
+    padding: var(--space-5);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  .toc__title {
+    font-size: var(--text-xs);
+    font-weight: 800;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  .toc__list {
+    margin-block-start: var(--space-4);
+    display: grid;
+    gap: var(--space-1);
+    list-style: none;
+    padding: 0;
+    counter-reset: toc;
+  }
+
+  .toc__item--nested {
+    padding-inline-start: var(--space-4);
+  }
+
+  .toc__link {
+    display: block;
+    padding: 0.35rem 0.6rem;
+    border-radius: var(--radius-sm);
+    border-inline-start: 2px solid transparent;
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    line-height: var(--leading-snug);
+    transition:
+      color var(--duration-fast) var(--ease-out),
+      border-color var(--duration-fast) var(--ease-out);
+  }
+
+  .toc__link:hover {
+    color: var(--text);
+  }
+
+  .toc__link[data-active] {
+    color: var(--primary);
+    border-inline-start-color: var(--primary);
+    font-weight: 600;
+  }
+
+  /**
+   * A fixacao fica no rail (.article__aside no ArticleLayout), nao aqui:
+   * `position: sticky` é limitado pelo bloco que contem o elemento, e o
+   * bloco deste componente tem a altura do proprio sumario — o efeito
+   * acabaria assim que ele saisse da tela.
+   */
+  @media (min-width: 1080px) {
+    .toc {
+      max-height: calc(100vh - var(--header-height) - var(--space-9));
+      overflow-y: auto;
+    }
+  }
+</style>
+
+<script>
+  /**
+   * Destaca no sumario a secao que o leitor esta lendo. Melhoria progressiva:
+   * sem JavaScript o sumario continua sendo uma lista de ancoras funcional.
+   */
+  const toc = document.querySelector<HTMLElement>('[data-toc]');
+
+  if (toc && 'IntersectionObserver' in window) {
+    const links = new Map<string, HTMLAnchorElement>();
+
+    for (const link of toc.querySelectorAll<HTMLAnchorElement>('[data-toc-link]')) {
+      const slug = link.dataset['tocLink'];
+      if (slug) links.set(slug, link);
+    }
+
+    const visible = new Set<string>();
+
+    const highlight = (): void => {
+      let active: string | undefined;
+
+      // A secao ativa é a primeira visivel na ordem do documento.
+      for (const slug of links.keys()) {
+        if (visible.has(slug)) {
+          active = slug;
+          break;
+        }
+      }
+
+      for (const [slug, link] of links) {
+        if (slug === active) link.setAttribute('data-active', '');
+        else link.removeAttribute('data-active');
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) visible.add(entry.target.id);
+          else visible.delete(entry.target.id);
+        }
+        highlight();
+      },
+      // Zona de leitura: do topo abaixo do header ate 60% da altura da tela.
+      { rootMargin: '-88px 0px -40% 0px', threshold: 0 },
+    );
+
+    for (const slug of links.keys()) {
+      const heading = document.getElementById(slug);
+      if (heading) observer.observe(heading);
+    }
+  }
+</script>

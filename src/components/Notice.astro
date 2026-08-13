@@ -1,0 +1,57 @@
+---
+type Props = {
+  /** `info` para avisos de contexto, `medical` para o aviso de saude. */
+  tone?: 'info' | 'medical';
+};
+
+const { tone = 'info' } = Astro.props;
+---
+
+<aside class:list={['notice', `notice--${tone}`]}>
+  <span class="notice__icon" aria-hidden="true">
+    {tone === 'medical' ? '+' : 'i'}
+  </span>
+  <p class="notice__text"><slot /></p>
+</aside>
+
+<style>
+  .notice {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-3);
+    align-items: start;
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background: var(--bg-subtle);
+  }
+
+  .notice__icon {
+    width: 22px;
+    height: 22px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-full);
+    background: var(--notice-accent, var(--text-faint));
+    color: var(--bg);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 0.72rem;
+    line-height: 1;
+  }
+
+  .notice__text {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+  }
+
+  .notice--info {
+    --notice-accent: var(--text-faint);
+  }
+
+  .notice--medical {
+    --notice-accent: var(--primary);
+    border-inline-start: 3px solid var(--primary);
+  }
+</style>

@@ -1,0 +1,18 @@
+---
+import type { GetStaticPaths } from 'astro';
+
+import { CONTENT_PAGE_KEYS, ROUTE_SEGMENTS, type ContentPageKey } from '@/i18n/routes';
+import ContentPageView from '@/views/ContentPageView.astro';
+
+export const getStaticPaths: GetStaticPaths = () =>
+  CONTENT_PAGE_KEYS.map((key) => ({
+    params: { page: ROUTE_SEGMENTS.en[key] },
+    props: { pageKey: key },
+  }));
+
+type Props = { pageKey: ContentPageKey };
+
+const { pageKey } = Astro.props;
+---
+
+<ContentPageView locale="en" pageKey={pageKey} />

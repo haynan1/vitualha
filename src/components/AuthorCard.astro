@@ -1,0 +1,172 @@
+---
+import { Image } from 'astro:assets';
+
+import type { Locale } from '@/i18n/locales';
+import type { AuthorEntry } from '@/lib/articles';
+
+type Props = {
+  author: AuthorEntry;
+  locale: Locale;
+  /** Rotulo opcional acima do nome (ex.: "Revisão técnica"). */
+  label?: string;
+  compact?: boolean;
+};
+
+const { author, locale, label, compact = false } = Astro.props;
+const { name, role, bio, avatar, credential, links } = author.data;
+
+const initials = name
+  .split(' ')
+  .filter((part) => part.length > 2)
+  .slice(0, 2)
+  .map((part) => part[0])
+  .join('');
+
+const profiles = Object.entries(links).filter(([, url]) => Boolean(url)) as Array<[string, string]>;
+---
+
+<article class:list={['author', compact && 'author--compact']}>
+  {
+    avatar ? (
+      <Image
+        src={avatar}
+        alt=""
+        width={compact ? 44 : 64}
+        height={compact ? 44 : 64}
+        class="author__avatar"
+      />
+    ) : (
+      <span class="author__avatar author__avatar--initials" aria-hidden="true">
+        {initials}
+      </span>
+    )
+  }
+
+  <div class="author__body">
+    {label && <p class="author__label">{label}</p>}
+    <p class="author__name">
+      {name}
+      {credential && <span class="author__credential">{credential}</span>}
+    </p>
+    <p class="author__role">{role[locale]}</p>
+    {!compact && <p class="author__bio">{bio[locale]}</p>}
+
+    {
+      !compact && profiles.length > 0 && (
+        <p class="author__links">
+          {profiles.map(([kind, url]) => (
+            <a href={url} rel="noopener noreferrer" target="_blank">
+              {kind}
+            </a>
+          ))}
+        </p>
+      )
+    }
+  </div>
+</article>
+
+<style>
+  .author {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-4);
+    padding: var(--space-5);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  .author--compact {
+    padding: 0;
+    background: none;
+    border: none;
+    align-items: center;
+  }
+
+  .author__avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-full);
+    object-fit: cover;
+  }
+
+  .author--compact .author__avatar {
+    width: 44px;
+    height: 44px;
+  }
+
+  .author__avatar--initials {
+    display: grid;
+    place-items: center;
+    background: var(--tint);
+    color: var(--primary-strong);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.1rem;
+  }
+
+  :global(:root[data-theme='dark']) .author__avatar--initials {
+    color: var(--primary);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .author__avatar--initials {
+      color: var(--primary);
+    }
+  }
+
+  .author__label {
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-block-end: var(--space-1);
+  }
+
+  .author__name {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: var(--text-base);
+  }
+
+  .author__credential {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--primary);
+  }
+
+  .author__role {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+  }
+
+  .author__bio {
+    margin-block-start: var(--space-3);
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+  }
+
+  .author__links {
+    display: flex;
+    gap: var(--space-4);
+    margin-block-start: var(--space-3);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+
+  .author__links a {
+    color: var(--primary);
+  }
+
+  .author__links a:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+</style>

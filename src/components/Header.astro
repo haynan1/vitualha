@@ -1,0 +1,234 @@
+---
+import LangToggle from '@/components/LangToggle.astro';
+import Logo from '@/components/Logo.astro';
+import ThemeToggle from '@/components/ThemeToggle.astro';
+import type { Locale } from '@/i18n/locales';
+import { homeUrl, searchUrl } from '@/i18n/routes';
+import { t } from '@/i18n/ui';
+import { isActive, mainNav } from '@/lib/navigation';
+
+type Props = {
+  locale: Locale;
+  localeUrls: Record<Locale, string>;
+};
+
+const { locale, localeUrls } = Astro.props;
+const ui = t(locale);
+const pathname = Astro.url.pathname;
+const items = mainNav(locale);
+---
+
+<header class="header">
+  <div class="header__inner container">
+    <a class="header__brand" href={homeUrl(locale)} aria-label={ui.nav.home}>
+      <Logo />
+    </a>
+
+    <nav class="header__nav" aria-label={ui.nav.menu}>
+      {
+        items.map((item) => (
+          <a
+            href={item.href}
+            class="header__link"
+            aria-current={isActive(item.href, pathname, locale) ? 'page' : undefined}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="header__actions">
+      <a class="icon-btn" href={searchUrl(locale)} aria-label={ui.header.searchLabel}>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.9"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="m20 20-3.6-3.6"></path>
+        </svg>
+      </a>
+
+      <LangToggle locale={locale} urls={localeUrls} />
+      <ThemeToggle locale={locale} />
+
+      <details class="menu">
+        <summary class="icon-btn menu__button" aria-label={ui.nav.menu}>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.9"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <path d="M4 7h16M4 12h16M4 17h16"></path>
+          </svg>
+        </summary>
+
+        <nav class="menu__panel" aria-label={ui.nav.menu}>
+          {
+            items.map((item) => (
+              <a
+                href={item.href}
+                class="menu__link"
+                aria-current={isActive(item.href, pathname, locale) ? 'page' : undefined}
+              >
+                {item.label}
+              </a>
+            ))
+          }
+        </nav>
+      </details>
+    </div>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-header);
+    background: var(--header-bg);
+    backdrop-filter: blur(14px) saturate(1.4);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header__inner {
+    height: var(--header-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-5);
+  }
+
+  .header__brand {
+    flex-shrink: 0;
+  }
+
+  .header__nav {
+    display: none;
+    align-items: center;
+    gap: clamp(1rem, 0.2rem + 1.5vw, 1.75rem);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.92rem;
+  }
+
+  .header__link {
+    position: relative;
+    color: var(--text);
+    opacity: 0.82;
+    padding-block: 0.35rem;
+    transition:
+      opacity var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out);
+  }
+
+  .header__link:hover {
+    opacity: 1;
+    color: var(--primary);
+  }
+
+  /* Sublinhado cresce a partir do centro — o mesmo gesto do hover e do ativo. */
+  .header__link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.15rem;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--primary);
+    transform: scaleX(0);
+    transition: transform var(--duration) var(--ease-out);
+  }
+
+  .header__link:hover::after,
+  .header__link[aria-current='page']::after {
+    transform: scaleX(1);
+  }
+
+  .header__link[aria-current='page'] {
+    opacity: 1;
+    color: var(--primary);
+  }
+
+  .header__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-shrink: 0;
+  }
+
+  /**
+   * Menu do celular em <details>: abre e fecha sem uma linha de JavaScript,
+   * é navegavel por teclado por padrao e nao pode ficar preso aberto se um
+   * script falhar.
+   */
+  .menu {
+    position: relative;
+  }
+
+  .menu__button {
+    list-style: none;
+  }
+
+  .menu__button::-webkit-details-marker {
+    display: none;
+  }
+
+  .menu__panel {
+    position: absolute;
+    top: calc(100% + 0.75rem);
+    right: 0;
+    min-width: 220px;
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-2);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    animation: menu-in var(--duration) var(--ease-out);
+  }
+
+  .menu__link {
+    padding: 0.7rem 0.85rem;
+    border-radius: var(--radius-md);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+
+  .menu__link:hover {
+    background: var(--surface-hover);
+  }
+
+  .menu__link[aria-current='page'] {
+    color: var(--primary);
+    background: var(--tint);
+  }
+
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+  }
+
+  @media (min-width: 1080px) {
+    .header__nav {
+      display: flex;
+    }
+
+    .menu {
+      display: none;
+    }
+  }
+</style>

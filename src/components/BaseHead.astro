@@ -1,0 +1,147 @@
+---
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+
+import AdSense from '@/components/AdSense.astro';
+import type { AdSurface } from '@/config/ads';
+import { ANALYTICS, SITE, TAGLINE } from '@/config/site';
+import { LOCALE_TAG, type Locale } from '@/i18n/locales';
+import { homeUrl } from '@/i18n/routes';
+import {
+  absolute,
+  alternateLinks,
+  graph,
+  jsonLd,
+  organizationSchema,
+  websiteSchema,
+} from '@/lib/seo';
+
+type Props = {
+  title: string;
+  description: string;
+  locale: Locale;
+  /** URLs equivalentes por idioma. Sem isso, hreflang aponta para as homes. */
+  alternates?: Partial<Record<Locale, string>>;
+  /** Caminho da imagem social (relativo ou absoluto). */
+  image?: string | undefined;
+  imageAlt?: string | undefined;
+  type?: 'website' | 'article';
+  noindex?: boolean;
+  /**
+   * Sobrescreve o canonical. Usado pelas paginas de fallback de idioma, que
+   * exibem o texto original e por isso apontam para a URL original em vez de
+   * competirem com ela como conteudo duplicado.
+   */
+  canonical?: string | undefined;
+  /** Nos extras de JSON-LD desta pagina (Article, Breadcrumb, FAQ...). */
+  schema?: unknown[];
+  /**
+   * Tipo de pagina para a monetizacao. Ausente significa "sem anuncio" — e
+   * entao nenhum script do Google entra no documento.
+   */
+  ads?: AdSurface | undefined;
+};
+
+const {
+  title,
+  description,
+  locale,
+  alternates,
+  image,
+  imageAlt,
+  type = 'website',
+  noindex = false,
+  canonical: canonicalOverride,
+  schema = [],
+  ads,
+} = Astro.props;
+
+const site = Astro.site;
+const canonical = canonicalOverride ?? absolute(Astro.url.pathname, site);
+
+/**
+ * A capa social padrao é gerada por scripts/prepare-assets.mjs. Se por algum
+ * motivo nao existir, é melhor nao anunciar og:image do que apontar para 404.
+ */
+const defaultOg = existsSync(join(process.cwd(), 'public', 'og-default.png'))
+  ? '/og-default.png'
+  : undefined;
+
+const socialImage = image ?? defaultOg;
+const socialImageUrl = socialImage ? absolute(socialImage, site) : undefined;
+
+const links = alternateLinks(alternates ?? { pt: homeUrl('pt'), en: homeUrl('en') }, site);
+
+const rssPath = locale === 'pt' ? '/rss.xml' : '/en/rss.xml';
+
+const structuredData = graph([organizationSchema(site), websiteSchema(site, locale), ...schema]);
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content={Astro.generator} />
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+
+{noindex && <meta name="robots" content="noindex, follow" />}
+
+{links.map((link) => <link rel="alternate" hreflang={link.hreflang} href={link.href} />)}
+
+<link rel="alternate" type="application/rss+xml" title={`${SITE.name} — RSS`} href={rssPath} />
+
+<!-- Tema aplicado antes da primeira pintura: sem piscada de branco no modo escuro.
+     Arquivo externo (nao inline) para a CSP poder exigir script-src 'self'. -->
+<script src="/theme.js" is:inline></script>
+
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+<meta name="theme-color" content="#fafaf7" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#17181a" media="(prefers-color-scheme: dark)" />
+
+<link
+  rel="preload"
+  href="/fonts/manrope-latin-wght-normal.woff2"
+  as="font"
+  type="font/woff2"
+  crossorigin
+/>
+<link
+  rel="preload"
+  href="/fonts/inter-latin-wght-normal.woff2"
+  as="font"
+  type="font/woff2"
+  crossorigin
+/>
+
+<meta property="og:type" content={type} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:site_name" content={SITE.name} />
+<meta property="og:locale" content={LOCALE_TAG[locale].replace('-', '_')} />
+{socialImageUrl && <meta property="og:image" content={socialImageUrl} />}
+{socialImageUrl && <meta property="og:image:alt" content={imageAlt ?? TAGLINE[locale]} />}
+
+<meta name="twitter:card" content={socialImageUrl ? 'summary_large_image' : 'summary'} />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+{socialImageUrl && <meta name="twitter:image" content={socialImageUrl} />}
+
+<script type="application/ld+json" is:inline set:html={jsonLd(structuredData)} />
+
+<AdSense surface={ads} />
+
+{
+  ANALYTICS.src && (
+    <script
+      is:inline
+      defer
+      src={ANALYTICS.src}
+      data-website-id={ANALYTICS.websiteId || undefined}
+      data-domain={Astro.site?.hostname}
+    />
+  )
+}

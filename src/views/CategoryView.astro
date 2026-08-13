@@ -1,0 +1,139 @@
+---
+import AdSlot from '@/components/AdSlot.astro';
+import ArticleGrid from '@/components/ArticleGrid.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import CategoryGrid from '@/components/CategoryGrid.astro';
+import Newsletter from '@/components/Newsletter.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+import type { Category } from '@/config/categories';
+import { LOCALES, type Locale } from '@/i18n/locales';
+import { articlesUrl, categoryUrl, homeUrl } from '@/i18n/routes';
+import { t } from '@/i18n/ui';
+import { getArticlesByCategory } from '@/lib/articles';
+import type { Crumb } from '@/lib/navigation';
+import { breadcrumbSchema } from '@/lib/seo';
+
+type Props = { locale: Locale; category: Category };
+
+const { locale, category } = Astro.props;
+const ui = t(locale);
+const copy = category[locale];
+const articles = await getArticlesByCategory(locale, category.key);
+
+/**
+ * O seletor de idioma leva para a MESMA categoria no outro idioma, usando o
+ * slug daquele idioma — trocar de idioma nao devolve o leitor para a home.
+ */
+const localeUrls = Object.fromEntries(
+  LOCALES.map((option) => [option, categoryUrl(option, category[option].slug)]),
+) as Record<Locale, string>;
+
+const trail: Crumb[] = [
+  { name: ui.breadcrumb.home, url: homeUrl(locale) },
+  { name: ui.nav.articles, url: articlesUrl(locale) },
+  { name: copy.name, url: categoryUrl(locale, copy.slug) },
+];
+
+const count = articles.length;
+const countLabel = count === 1 ? ui.category.countOne : ui.category.countMany;
+---
+
+<BaseLayout
+  title={copy.name}
+  description={copy.description}
+  locale={locale}
+  localeUrls={localeUrls}
+  schema={[breadcrumbSchema(trail, Astro.site)]}
+  ads="listing"
+>
+  <div class="container">
+    <div class="head" style={`--hue: ${category.hue};`}>
+      <Breadcrumbs locale={locale} trail={trail} />
+
+      <div class="head__row">
+        <span class="head__letter" aria-hidden="true">{category.letter}</span>
+        <div>
+          <h1 class="head__title">{copy.name}</h1>
+          <p class="head__desc">{copy.description}</p>
+        </div>
+      </div>
+
+      <p class="head__count">{count} {countLabel}</p>
+    </div>
+
+    <ArticleGrid articles={articles} eagerFirst emptyMessage={ui.category.empty} />
+
+    <section class="after" aria-labelledby="other-categories">
+      <div class="section-head">
+        <h2 class="section-title" id="other-categories">{ui.home.categoriesTitle}</h2>
+      </div>
+      <CategoryGrid locale={locale} />
+    </section>
+
+    <AdSlot name="listing" locale={locale} minHeight={300} />
+
+    <div class="after">
+      <Newsletter locale={locale} />
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .head {
+    padding-block: var(--space-6) var(--space-8);
+    max-width: 52rem;
+  }
+
+  .head__row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    margin-block-start: var(--space-5);
+  }
+
+  .head__letter {
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-lg);
+    background: hsl(var(--hue) 40% 42% / 0.14);
+    color: hsl(var(--hue) 46% 32%);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.5rem;
+  }
+
+  :global(:root[data-theme='dark']) .head__letter {
+    color: hsl(var(--hue) 52% 70%);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .head__letter {
+      color: hsl(var(--hue) 52% 70%);
+    }
+  }
+
+  .head__title {
+    font-size: var(--text-2xl);
+  }
+
+  .head__desc {
+    margin-block-start: var(--space-3);
+    color: var(--text-muted);
+    font-size: var(--text-md);
+  }
+
+  .head__count {
+    margin-block-start: var(--space-5);
+    color: var(--text-faint);
+    font-size: var(--text-xs);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .after {
+    margin-block-start: var(--section-gap);
+  }
+</style>

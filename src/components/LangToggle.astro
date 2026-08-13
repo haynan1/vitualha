@@ -1,0 +1,76 @@
+---
+import { LOCALES, LOCALE_LABEL, LOCALE_NAME, LOCALE_TAG, type Locale } from '@/i18n/locales';
+import { t } from '@/i18n/ui';
+
+type Props = {
+  locale: Locale;
+  /**
+   * Destino equivalente em cada idioma — obrigatorio para todos. Quem chama
+   * resolve o fallback (home do idioma), entao aqui nunca existe link vazio.
+   */
+  urls: Record<Locale, string>;
+};
+
+const { locale, urls } = Astro.props;
+const ui = t(locale);
+---
+
+<nav class="lang-toggle" aria-label={ui.header.langLabel}>
+  {
+    LOCALES.map((option) => {
+      const href = urls[option];
+      const isCurrent = option === locale;
+
+      return (
+        <a
+          href={href}
+          class="lang-toggle__option"
+          hreflang={LOCALE_TAG[option]}
+          lang={LOCALE_TAG[option]}
+          aria-current={isCurrent ? 'true' : undefined}
+          data-current={isCurrent ? '' : undefined}
+        >
+          <span aria-hidden="true">{LOCALE_LABEL[option]}</span>
+          <span class="visually-hidden">{LOCALE_NAME[option]}</span>
+        </a>
+      );
+    })
+  }
+</nav>
+
+<style>
+  /**
+   * Sao dois links reais, um por idioma — nao um botao que troca estado no
+   * cliente. Funciona sem JavaScript, é rastreavel pelo buscador e cada
+   * idioma tem URL propria.
+   */
+  .lang-toggle {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+  }
+
+  .lang-toggle__option {
+    padding: 0.44rem 0.66rem;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.78rem;
+    letter-spacing: 0.02em;
+    color: var(--text-muted);
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out);
+  }
+
+  .lang-toggle__option:hover {
+    color: var(--text);
+    background: var(--surface-hover);
+  }
+
+  .lang-toggle__option[data-current] {
+    background: var(--primary);
+    color: var(--primary-contrast);
+  }
+</style>

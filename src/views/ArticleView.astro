@@ -1,0 +1,98 @@
+---
+import { getImage } from 'astro:assets';
+import { render } from 'astro:content';
+
+import ArticleLayout from '@/layouts/ArticleLayout.astro';
+
+import { CATEGORIES } from '@/config/categories';
+import { LOCALES, type Locale } from '@/i18n/locales';
+import { articlesUrl, categoryUrl, homeUrl } from '@/i18n/routes';
+import { t } from '@/i18n/ui';
+import {
+  alternateUrls,
+  getAuthor,
+  getRelated,
+  getReviewer,
+  translationUrl,
+  type Article,
+} from '@/lib/articles';
+import type { Crumb } from '@/lib/navigation';
+import { absolute, articleSchema, breadcrumbSchema, faqSchema } from '@/lib/seo';
+
+type Props = { article: Article };
+
+const { article } = Astro.props;
+const { locale, entry } = article;
+const data = entry.data;
+const ui = t(locale);
+const category = CATEGORIES[data.category][locale];
+
+const { Content, headings } = await render(entry);
+
+const [author, reviewer, related, alternates] = await Promise.all([
+  getAuthor(article),
+  getReviewer(article),
+  getRelated(article),
+  alternateUrls(article.key),
+]);
+
+const localeUrls = Object.fromEntries(
+  await Promise.all(
+    LOCALES.map(async (option) => [option, await translationUrl(article.key, option)] as const),
+  ),
+) as Record<Locale, string>;
+
+/**
+ * A capa vira URL absoluta e num tamanho que as redes sociais aceitam.
+ * Sem capa, o BaseHead cai na imagem padrao da marca.
+ */
+const socialImage = data.cover
+  ? absolute(
+      (await getImage({ src: data.cover, width: 1200, height: 630, format: 'jpg' })).src,
+      Astro.site,
+    )
+  : undefined;
+
+const trail: Crumb[] = [
+  { name: ui.breadcrumb.home, url: homeUrl(locale) },
+  { name: ui.nav.articles, url: articlesUrl(locale) },
+  { name: category.name, url: categoryUrl(locale, category.slug) },
+  { name: data.title, url: article.url },
+];
+
+const schema: unknown[] = [
+  articleSchema({
+    title: data.title,
+    description: data.summary,
+    url: article.url,
+    locale,
+    publishedAt: data.publishedAt,
+    updatedAt: data.updatedAt,
+    category: data.category,
+    image: socialImage,
+    author: author ? { name: author.data.name, jobTitle: author.data.role[locale] } : undefined,
+    reviewer: reviewer
+      ? { name: reviewer.data.name, jobTitle: reviewer.data.role[locale] }
+      : undefined,
+    site: Astro.site,
+  }),
+  breadcrumbSchema(trail, Astro.site),
+];
+
+if (data.faq.length > 0) schema.push(faqSchema(data.faq));
+---
+
+<ArticleLayout
+  article={article}
+  author={author}
+  reviewer={reviewer}
+  related={related}
+  headings={headings}
+  trail={trail}
+  localeUrls={localeUrls}
+  alternates={alternates}
+  schema={schema}
+  socialImage={socialImage}
+>
+  <Content />
+</ArticleLayout>

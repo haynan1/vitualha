@@ -1,0 +1,127 @@
+---
+import { NEWSLETTER_ACTION, NEWSLETTER_FIELD } from '@/config/site';
+import type { Locale } from '@/i18n/locales';
+import { route } from '@/i18n/routes';
+import { t } from '@/i18n/ui';
+
+type Props = { locale: Locale };
+
+const { locale } = Astro.props;
+const ui = t(locale);
+
+/**
+ * Sem provedor configurado (PUBLIC_NEWSLETTER_ACTION vazio), o bloco vira um
+ * convite para o contato. Um formulario que aceita e-mail e joga fora seria
+ * pior do que nao ter formulario nenhum.
+ */
+const hasProvider = NEWSLETTER_ACTION.length > 0;
+---
+
+<section class="newsletter" aria-labelledby="newsletter-title">
+  <div class="newsletter__content">
+    <h2 class="newsletter__title" id="newsletter-title">{ui.newsletter.title}</h2>
+    <p class="newsletter__text">{ui.newsletter.text}</p>
+  </div>
+
+  {
+    hasProvider ? (
+      <form class="newsletter__form" action={NEWSLETTER_ACTION} method="post" target="_blank">
+        <label class="visually-hidden" for="newsletter-email">
+          {ui.newsletter.placeholder}
+        </label>
+        <input
+          class="newsletter__input"
+          id="newsletter-email"
+          type="email"
+          name={NEWSLETTER_FIELD}
+          placeholder={ui.newsletter.placeholder}
+          autocomplete="email"
+          required
+        />
+        <button class="btn btn--primary" type="submit">
+          {ui.newsletter.button}
+        </button>
+        <p class="newsletter__privacy">{ui.newsletter.privacy}</p>
+      </form>
+    ) : (
+      <p class="newsletter__form">
+        <a class="btn btn--primary" href={route(locale, 'contact')}>
+          {ui.newsletter.fallbackCta}
+        </a>
+      </p>
+    )
+  }
+</section>
+
+<style>
+  .newsletter {
+    display: grid;
+    gap: var(--space-6);
+    padding: clamp(2rem, 1.4rem + 2.4vw, 3.25rem);
+    border-radius: var(--radius-xl);
+    background:
+      radial-gradient(
+        90% 140% at 8% 0%,
+        color-mix(in srgb, var(--primary) 16%, transparent),
+        transparent 70%
+      ),
+      var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  .newsletter__title {
+    font-size: var(--text-xl);
+  }
+
+  .newsletter__text {
+    margin-block-start: var(--space-3);
+    max-width: 46ch;
+    color: var(--text-muted);
+    line-height: var(--leading-relaxed);
+  }
+
+  .newsletter__form {
+    display: grid;
+    gap: var(--space-3);
+    align-content: center;
+    grid-template-columns: 1fr auto;
+  }
+
+  .newsletter__input {
+    padding: 0.78rem 1.1rem;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-strong);
+    background: var(--bg);
+    color: var(--text);
+    font-size: var(--text-sm);
+    min-width: 0;
+  }
+
+  .newsletter__input::placeholder {
+    color: var(--text-faint);
+  }
+
+  .newsletter__input:focus-visible {
+    border-color: var(--primary);
+  }
+
+  .newsletter__privacy {
+    grid-column: 1 / -1;
+    color: var(--text-faint);
+    font-size: var(--text-xs);
+  }
+
+  @media (min-width: 860px) {
+    .newsletter {
+      grid-template-columns: 1.1fr 1fr;
+      align-items: center;
+      gap: var(--space-8);
+    }
+  }
+
+  @media (max-width: 520px) {
+    .newsletter__form {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

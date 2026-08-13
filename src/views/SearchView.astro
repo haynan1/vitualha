@@ -1,0 +1,343 @@
+---
+import CategoryGrid from '@/components/CategoryGrid.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+import { LOCALES, type Locale } from '@/i18n/locales';
+import { searchUrl } from '@/i18n/routes';
+import { t } from '@/i18n/ui';
+
+type Props = { locale: Locale };
+
+const { locale } = Astro.props;
+const ui = t(locale);
+
+const localeUrls = Object.fromEntries(
+  LOCALES.map((option) => [option, searchUrl(option)]),
+) as Record<Locale, string>;
+---
+
+<BaseLayout
+  title={ui.search.title}
+  description={ui.meta.searchDescription}
+  locale={locale}
+  localeUrls={localeUrls}
+  noindex
+>
+  <div class="container search">
+    <h1 class="search__title">{ui.search.title}</h1>
+    <p class="search__subtitle">{ui.search.subtitle}</p>
+
+    <form class="search__form" role="search" data-search-form>
+      <label class="visually-hidden" for="search-input">{ui.search.placeholder}</label>
+      <input
+        class="search__input"
+        id="search-input"
+        type="search"
+        name="q"
+        placeholder={ui.search.placeholder}
+        autocomplete="off"
+        autocapitalize="off"
+        spellcheck="false"
+      />
+    </form>
+
+    <p class="search__status" role="status" aria-live="polite" data-search-status></p>
+
+    <noscript>
+      <p class="search__status">{ui.search.noScript}</p>
+    </noscript>
+
+    <ol class="search__results" data-search-results></ol>
+
+    <section class="search__browse" aria-labelledby="browse-title">
+      <h2 class="section-title" id="browse-title">{ui.home.categoriesTitle}</h2>
+      <div class="search__browse-grid">
+        <CategoryGrid locale={locale} />
+      </div>
+    </section>
+  </div>
+
+  <template
+    data-search-i18n
+    data-loading={ui.search.loading}
+    data-empty={ui.search.empty}
+    data-results-for={ui.search.resultsFor}
+    data-read-time={ui.article.readTime}></template>
+</BaseLayout>
+
+<style>
+  .search {
+    padding-block: var(--space-8) var(--space-6);
+  }
+
+  .search__title {
+    font-size: var(--text-2xl);
+  }
+
+  .search__subtitle {
+    margin-block-start: var(--space-3);
+    color: var(--text-muted);
+    max-width: 46ch;
+  }
+
+  .search__form {
+    margin-block-start: var(--space-6);
+    max-width: 40rem;
+  }
+
+  .search__input {
+    width: 100%;
+    padding: 0.95rem 1.35rem;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text);
+    font-size: var(--text-md);
+  }
+
+  .search__input::placeholder {
+    color: var(--text-faint);
+  }
+
+  .search__input:focus-visible {
+    border-color: var(--primary);
+  }
+
+  .search__status {
+    margin-block-start: var(--space-4);
+    min-height: 1.2em;
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+  }
+
+  .search__results {
+    display: grid;
+    gap: var(--space-2);
+    list-style: none;
+    padding: 0;
+    margin-block-start: var(--space-4);
+  }
+
+  .search__results:empty {
+    margin: 0;
+  }
+
+  .search__browse {
+    margin-block-start: var(--section-gap);
+  }
+
+  .search__browse-grid {
+    margin-block-start: var(--space-6);
+  }
+
+  /* Estilos dos resultados: o markup é criado pelo script abaixo. */
+  .search__results :global(.result) {
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    transition: border-color var(--duration-fast) var(--ease-out);
+  }
+
+  .search__results :global(.result:hover) {
+    border-color: var(--border-strong);
+  }
+
+  .search__results :global(.result__title) {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: var(--text-base);
+    letter-spacing: var(--tracking-snug);
+  }
+
+  .search__results :global(.result__excerpt) {
+    margin-block-start: var(--space-2);
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+  }
+
+  .search__results :global(.result__excerpt mark) {
+    background: var(--tint);
+    color: inherit;
+    border-radius: 3px;
+    padding: 0 0.15em;
+  }
+</style>
+
+<script>
+  /**
+   * Busca 100% estatica: o indice é gerado pelo Pagefind no fim do build e
+   * consultado no navegador. Nao existe servidor de busca para manter, pagar
+   * ou proteger — e a consulta do leitor nao sai do dispositivo dele.
+   *
+   * A interface é propria (e nao o widget pronto do Pagefind) para respeitar
+   * o design system e nao carregar CSS de terceiro.
+   */
+  type PagefindResult = {
+    data: () => Promise<{
+      url: string;
+      excerpt: string;
+      meta: Record<string, string | undefined>;
+    }>;
+  };
+
+  type PagefindApi = {
+    options: (value: Record<string, unknown>) => Promise<void>;
+    search: (query: string) => Promise<{ results: PagefindResult[] }>;
+  };
+
+  const form = document.querySelector<HTMLFormElement>('[data-search-form]');
+  const input = document.querySelector<HTMLInputElement>('#search-input');
+  const status = document.querySelector<HTMLElement>('[data-search-status]');
+  const list = document.querySelector<HTMLOListElement>('[data-search-results]');
+  const i18n = document.querySelector<HTMLTemplateElement>('[data-search-i18n]');
+
+  const MAX_RESULTS = 12;
+  const DEBOUNCE_MS = 180;
+
+  if (form && input && status && list && i18n) {
+    /**
+     * Declaracao de funcao é icada, e o TypeScript nao leva o estreitamento
+     * da guarda acima para dentro dela. Os apelidos abaixo carregam o tipo ja
+     * estreitado para as funcoes que usam esses elementos.
+     */
+    const statusEl = status;
+    const listEl = list;
+
+    const copy = {
+      loading: i18n.dataset['loading'] ?? '',
+      empty: i18n.dataset['empty'] ?? '',
+      resultsFor: i18n.dataset['resultsFor'] ?? '',
+    };
+
+    let api: PagefindApi | undefined;
+    let token = 0;
+
+    form.addEventListener('submit', (event) => event.preventDefault());
+
+    async function loadApi(): Promise<PagefindApi | undefined> {
+      if (api) return api;
+
+      try {
+        // Caminho em variavel: o bundler nao tenta resolver um arquivo que so
+        // existe depois do build (o indice é gerado a partir do proprio dist).
+        const path = '/pagefind/pagefind.js';
+        const module = (await import(/* @vite-ignore */ path)) as PagefindApi;
+        await module.options({ excerptLength: 28 });
+        api = module;
+        return api;
+      } catch {
+        return undefined;
+      }
+    }
+
+    function render(
+      entries: Array<{ url: string; excerpt: string; meta: Record<string, string | undefined> }>,
+      query: string,
+    ): void {
+      listEl.replaceChildren();
+
+      for (const entry of entries) {
+        const item = document.createElement('li');
+        item.className = 'result';
+
+        const link = document.createElement('a');
+        link.href = entry.url;
+        link.className = 'result__title';
+        link.textContent = entry.meta['title'] ?? entry.url;
+
+        const excerpt = document.createElement('p');
+        excerpt.className = 'result__excerpt';
+        // O excerpt do Pagefind traz <mark> nos termos encontrados. Só essa
+        // tag é aceita — o resto vira texto, sem HTML de origem externa.
+        excerpt.innerHTML = sanitizeExcerpt(entry.excerpt);
+
+        item.append(link, excerpt);
+        listEl.append(item);
+      }
+
+      statusEl.textContent =
+        entries.length === 0 ? copy.empty : `${copy.resultsFor} “${query}” (${entries.length})`;
+    }
+
+    function sanitizeExcerpt(html: string): string {
+      const template = document.createElement('template');
+      template.innerHTML = html;
+
+      const walk = (node: Node): void => {
+        for (const child of Array.from(node.childNodes)) {
+          if (child.nodeType === Node.TEXT_NODE) continue;
+
+          if (child.nodeType === Node.ELEMENT_NODE && (child as Element).tagName === 'MARK') {
+            // Mantem a marcacao do termo, descarta qualquer atributo: um
+            // `onmouseover` sobrevivente viraria execucao de script.
+            const mark = child as Element;
+            for (const attribute of [...mark.attributes]) mark.removeAttribute(attribute.name);
+            walk(child);
+            continue;
+          }
+
+          child.replaceWith(document.createTextNode(child.textContent ?? ''));
+        }
+      };
+
+      walk(template.content);
+      return template.innerHTML;
+    }
+
+    async function run(query: string): Promise<void> {
+      const trimmed = query.trim();
+      const current = ++token;
+
+      if (trimmed.length < 2) {
+        listEl.replaceChildren();
+        statusEl.textContent = '';
+        return;
+      }
+
+      statusEl.textContent = copy.loading;
+
+      const module = await loadApi();
+      if (!module) {
+        statusEl.textContent = copy.empty;
+        return;
+      }
+
+      try {
+        const search = await module.search(trimmed);
+        // Uma resposta antiga nunca sobrescreve a busca mais recente.
+        if (current !== token) return;
+
+        const entries = await Promise.all(
+          search.results.slice(0, MAX_RESULTS).map((result) => result.data()),
+        );
+        if (current !== token) return;
+
+        render(entries, trimmed);
+      } catch {
+        // Indice corrompido ou pedaco do indice que nao baixou: o leitor
+        // recebe o estado vazio em vez de "Buscando..." travado na tela.
+        if (current !== token) return;
+        listEl.replaceChildren();
+        statusEl.textContent = copy.empty;
+      }
+    }
+
+    let timer: number | undefined;
+
+    input.addEventListener('input', () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => void run(input.value), DEBOUNCE_MS);
+    });
+
+    // Permite chegar na busca ja com o termo: /busca/?q=proteina
+    const initial = new URLSearchParams(window.location.search).get('q');
+    if (initial) {
+      input.value = initial;
+      void run(initial);
+    }
+
+    input.focus();
+  }
+</script>

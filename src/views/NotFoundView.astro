@@ -1,0 +1,89 @@
+---
+import CategoryGrid from '@/components/CategoryGrid.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+import { LOCALES, type Locale } from '@/i18n/locales';
+import { homeUrl, searchUrl } from '@/i18n/routes';
+import { t } from '@/i18n/ui';
+
+type Props = { locale: Locale };
+
+const { locale } = Astro.props;
+const ui = t(locale);
+
+const localeUrls = Object.fromEntries(LOCALES.map((option) => [option, homeUrl(option)])) as Record<
+  Locale,
+  string
+>;
+---
+
+<BaseLayout
+  title={ui.notFound.title}
+  description={ui.notFound.text}
+  locale={locale}
+  localeUrls={localeUrls}
+  noindex
+>
+  <div class="container notfound">
+    <p class="notfound__code" aria-hidden="true">404</p>
+    <h1 class="notfound__title">{ui.notFound.title}</h1>
+    <p class="notfound__text">{ui.notFound.text}</p>
+
+    <p class="notfound__actions">
+      <a class="btn btn--primary" href={homeUrl(locale)}>{ui.notFound.cta}</a>
+      <a class="btn btn--ghost" href={searchUrl(locale)}>{ui.search.title}</a>
+    </p>
+
+    <section class="notfound__browse" aria-labelledby="notfound-browse">
+      <h2 class="section-title" id="notfound-browse">{ui.home.categoriesTitle}</h2>
+      <div class="notfound__grid">
+        <CategoryGrid locale={locale} />
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .notfound {
+    padding-block: var(--space-10) var(--space-8);
+    text-align: center;
+  }
+
+  .notfound__code {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: var(--text-3xl);
+    color: var(--primary);
+    opacity: 0.28;
+    line-height: 1;
+  }
+
+  .notfound__title {
+    margin-block-start: var(--space-4);
+    font-size: var(--text-2xl);
+  }
+
+  .notfound__text {
+    margin-block-start: var(--space-4);
+    margin-inline: auto;
+    max-width: 44ch;
+    color: var(--text-muted);
+  }
+
+  .notfound__actions {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    margin-block-start: var(--space-7);
+  }
+
+  .notfound__browse {
+    margin-block-start: var(--section-gap);
+    text-align: start;
+  }
+
+  .notfound__grid {
+    margin-block-start: var(--space-6);
+  }
+</style>

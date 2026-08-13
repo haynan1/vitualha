@@ -1,0 +1,50 @@
+---
+import ArticleCard from '@/components/ArticleCard.astro';
+import type { Article } from '@/lib/articles';
+
+type Props = {
+  articles: Article[];
+  headingLevel?: 2 | 3;
+  /** Marca a primeira capa como prioritaria (use so acima da dobra). */
+  eagerFirst?: boolean;
+  emptyMessage?: string;
+};
+
+const { articles, headingLevel = 3, eagerFirst = false, emptyMessage } = Astro.props;
+---
+
+{
+  articles.length > 0 ? (
+    <ul class="grid">
+      {articles.map((article, index) => (
+        <li>
+          <ArticleCard
+            article={article}
+            headingLevel={headingLevel}
+            eager={eagerFirst && index === 0}
+          />
+        </li>
+      ))}
+    </ul>
+  ) : (
+    emptyMessage && <p class="grid__empty">{emptyMessage}</p>
+  )
+}
+
+<style>
+  .grid {
+    display: grid;
+    gap: var(--space-7) var(--space-5);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    list-style: none;
+    padding: 0;
+  }
+
+  .grid__empty {
+    padding: var(--space-8);
+    border-radius: var(--radius-lg);
+    border: 1px dashed var(--border-strong);
+    color: var(--text-muted);
+    text-align: center;
+  }
+</style>

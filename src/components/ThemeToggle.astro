@@ -1,0 +1,108 @@
+---
+import type { Locale } from '@/i18n/locales';
+import { t } from '@/i18n/ui';
+
+type Props = { locale: Locale };
+
+const { locale } = Astro.props;
+const ui = t(locale);
+---
+
+<button
+  type="button"
+  class="icon-btn theme-toggle"
+  data-theme-toggle
+  aria-label={ui.header.themeLabel}
+>
+  <svg
+    class="theme-toggle__moon"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+  <svg
+    class="theme-toggle__sun"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="4.2"></circle>
+    <path
+      d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"
+    ></path>
+  </svg>
+</button>
+
+<style>
+  /**
+   * O icone visivel é decidido em CSS, nao em JavaScript: no primeiro paint o
+   * script de tema ja definiu (ou nao) o data-theme, e o CSS acompanha os dois
+   * estados. Nao existe instante com o icone errado na tela.
+   */
+  .theme-toggle__sun {
+    display: none;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .theme-toggle__moon {
+      display: none;
+    }
+
+    :global(:root:not([data-theme='light'])) .theme-toggle__sun {
+      display: block;
+    }
+  }
+
+  :global(:root[data-theme='dark']) .theme-toggle__moon {
+    display: none;
+  }
+
+  :global(:root[data-theme='dark']) .theme-toggle__sun {
+    display: block;
+  }
+
+  :global(:root[data-theme='light']) .theme-toggle__moon {
+    display: block;
+  }
+
+  :global(:root[data-theme='light']) .theme-toggle__sun {
+    display: none;
+  }
+</style>
+
+<script>
+  /**
+   * Alterna e memoriza a preferencia. O estado inicial vem de /theme.js, que
+   * roda antes da pintura; aqui so tratamos o clique.
+   */
+  const root = document.documentElement;
+
+  function effectiveTheme(): 'dark' | 'light' {
+    const explicit = root.getAttribute('data-theme');
+    if (explicit === 'dark' || explicit === 'light') return explicit;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]')) {
+    button.addEventListener('click', () => {
+      const next = effectiveTheme() === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+
+      try {
+        localStorage.setItem('theme', next);
+      } catch {
+        /* Sem storage a escolha vale ate o fim da navegacao — melhor que nada. */
+      }
+    });
+  }
+</script>

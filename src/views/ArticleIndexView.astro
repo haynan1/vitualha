@@ -1,0 +1,88 @@
+---
+import AdSlot from '@/components/AdSlot.astro';
+import ArticleGrid from '@/components/ArticleGrid.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import Newsletter from '@/components/Newsletter.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+import { LOCALES, type Locale } from '@/i18n/locales';
+import { articlesUrl, homeUrl } from '@/i18n/routes';
+import { t } from '@/i18n/ui';
+import { getArticles } from '@/lib/articles';
+import type { Crumb } from '@/lib/navigation';
+import { breadcrumbSchema } from '@/lib/seo';
+
+type Props = { locale: Locale };
+
+const { locale } = Astro.props;
+const ui = t(locale);
+const articles = await getArticles(locale);
+
+const localeUrls = Object.fromEntries(
+  LOCALES.map((option) => [option, articlesUrl(option)]),
+) as Record<Locale, string>;
+
+const trail: Crumb[] = [
+  { name: ui.breadcrumb.home, url: homeUrl(locale) },
+  { name: ui.nav.articles, url: articlesUrl(locale) },
+];
+
+const count = articles.length;
+const countLabel = count === 1 ? ui.category.countOne : ui.category.countMany;
+---
+
+<BaseLayout
+  title={ui.category.allTitle}
+  description={ui.meta.articlesDescription}
+  locale={locale}
+  localeUrls={localeUrls}
+  schema={[breadcrumbSchema(trail, Astro.site)]}
+  ads="listing"
+>
+  <div class="container">
+    <div class="head">
+      <Breadcrumbs locale={locale} trail={trail} />
+
+      <h1 class="head__title">{ui.category.allTitle}</h1>
+      <p class="head__subtitle">{ui.category.allSubtitle}</p>
+      <p class="head__count">{count} {countLabel}</p>
+    </div>
+
+    <ArticleGrid articles={articles} eagerFirst emptyMessage={ui.home.empty} />
+
+    <AdSlot name="listing" locale={locale} minHeight={300} />
+
+    <div class="after">
+      <Newsletter locale={locale} />
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .head {
+    padding-block: var(--space-6) var(--space-8);
+    max-width: 46rem;
+  }
+
+  .head__title {
+    margin-block-start: var(--space-5);
+    font-size: var(--text-2xl);
+  }
+
+  .head__subtitle {
+    margin-block-start: var(--space-4);
+    color: var(--text-muted);
+    font-size: var(--text-md);
+  }
+
+  .head__count {
+    margin-block-start: var(--space-4);
+    color: var(--text-faint);
+    font-size: var(--text-xs);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .after {
+    margin-block-start: var(--section-gap);
+  }
+</style>

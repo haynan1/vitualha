@@ -1,0 +1,156 @@
+---
+import CoverImage from '@/components/CoverImage.astro';
+import { CATEGORIES } from '@/config/categories';
+import { categoryUrl } from '@/i18n/routes';
+import { t } from '@/i18n/ui';
+import type { Article } from '@/lib/articles';
+import { formatDate, isoDate } from '@/lib/date';
+
+type Props = { article: Article };
+
+const { article } = Astro.props;
+const { locale, url, minutes, entry } = article;
+const data = entry.data;
+const ui = t(locale);
+const category = CATEGORIES[data.category][locale];
+
+/**
+ * Com capa, a abertura é em duas colunas. Sem capa, vira uma abertura
+ * tipografica de coluna unica com titulo maior — em vez de uma coluna vazia
+ * ou de um bloco decorativo ocupando metade da tela sem informar nada.
+ */
+const hasCover = Boolean(data.cover);
+---
+
+<section class:list={['hero', !hasCover && 'hero--editorial']} aria-labelledby="hero-title">
+  <div class="hero__text">
+    <p class="eyebrow">{ui.home.heroEyebrow}</p>
+
+    <div class="hero__badges">
+      <a class="badge" href={categoryUrl(locale, category.slug)}>{category.name}</a>
+      {data.draft && <span class="badge badge--draft">draft</span>}
+    </div>
+
+    <h1 class="hero__title" id="hero-title">
+      <a href={url}>{data.title}</a>
+    </h1>
+
+    <p class="hero__summary">{data.summary}</p>
+
+    <p class="hero__meta">
+      <time datetime={isoDate(data.publishedAt)}>{formatDate(data.publishedAt, locale)}</time>
+      <span aria-hidden="true">·</span>
+      <span>{`${minutes} ${ui.article.readTime}`}</span>
+    </p>
+
+    <p>
+      <a class="btn btn--primary" href={url}>
+        {ui.home.heroCta}
+        <svg
+          viewBox="0 0 24 24"
+          width="16"
+          height="16"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M5 12h13M13 6l6 6-6 6"></path>
+        </svg>
+      </a>
+    </p>
+  </div>
+
+  {
+    hasCover && (
+      <div class="hero__media">
+        <CoverImage
+          article={article}
+          sizes="(min-width: 900px) 620px, 94vw"
+          widths={[480, 760, 1240]}
+          eager
+          ratio="4 / 3"
+        />
+      </div>
+    )
+  }
+</section>
+
+<style>
+  .hero {
+    display: grid;
+    gap: var(--space-7);
+    align-items: center;
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 4.5rem);
+  }
+
+  .hero__badges {
+    display: flex;
+    gap: var(--space-2);
+    margin-block-start: var(--space-4);
+  }
+
+  .hero__title {
+    margin-block-start: var(--space-4);
+    font-size: var(--text-2xl);
+  }
+
+  .hero__title a {
+    background-image: linear-gradient(var(--primary), var(--primary));
+    background-size: 0% 2px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size var(--duration-slow) var(--ease-out);
+  }
+
+  .hero__title a:hover {
+    background-size: 100% 2px;
+  }
+
+  .hero__summary {
+    margin-block-start: var(--space-4);
+    max-width: 54ch;
+    color: var(--text-muted);
+    font-size: var(--text-md);
+    line-height: var(--leading-relaxed);
+  }
+
+  .hero__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-block: var(--space-5);
+    color: var(--text-faint);
+    font-size: var(--text-xs);
+  }
+
+  .hero__media :global(.cover) {
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Abertura sem capa: coluna unica, tipografia maior e mais respiro. */
+  .hero--editorial {
+    padding-block: clamp(3rem, 2rem + 6vw, 6rem);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero--editorial .hero__title {
+    font-size: var(--text-3xl);
+    max-width: 22ch;
+  }
+
+  .hero--editorial .hero__summary {
+    font-size: var(--text-lg);
+    max-width: 52ch;
+    line-height: var(--leading-snug);
+  }
+
+  @media (min-width: 900px) {
+    .hero:not(.hero--editorial) {
+      grid-template-columns: 1fr 1.05fr;
+      gap: var(--space-9);
+    }
+  }
+</style>

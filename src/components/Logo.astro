@@ -1,0 +1,48 @@
+---
+import { SITE } from '@/config/site';
+---
+
+<span class="logo">
+  <span class="logo__mark" aria-hidden="true">{SITE.monogram}</span>
+  <span class="logo__word">{SITE.name}</span>
+</span>
+
+<style>
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 0;
+  }
+
+  .logo__mark {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    background: var(--primary);
+    color: var(--primary-contrast);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.06rem;
+    line-height: 1;
+  }
+
+  .logo__word {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.02rem;
+    letter-spacing: var(--tracking-snug);
+    white-space: nowrap;
+    color: var(--text);
+  }
+
+  /* Abaixo de 420px o simbolo sozinho ja identifica a marca. */
+  @media (max-width: 420px) {
+    .logo__word {
+      display: none;
+    }
+  }
+</style>
