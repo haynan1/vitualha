@@ -1,0 +1,286 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Editor visual do Nutricao em Acao (Sveltia CMS)
+#
+# Dois modos de uso:
+#
+#  1. LOCAL (recomendado no dia a dia, nao exige login nem servidor)
+#     npm run dev  ->  http://localhost:4321/admin/
+#     Clique em "Work with Local Repository" e escolha a pasta do projeto.
+#     O CMS edita os arquivos .md direto no disco. Depois: git commit + push.
+#
+#  2. REMOTO (editar de qualquer lugar, inclusive do celular)
+#     Preencha `repo` abaixo e configure o OAuth do GitHub.
+#     Ver ARCHITECTURE.md > "Editando de qualquer lugar".
+#
+# Os campos aqui espelham o schema em src/content.config.ts. Campo a mais ou
+# com nome trocado faz o build falhar de proposito — melhor quebrar no CI do
+# que publicar um artigo com dado invalido.
+# ─────────────────────────────────────────────────────────────────────────────
+
+backend:
+  name: github
+  repo: SEU-USUARIO/nutricao_blog # <- troque pelo caminho real do repositorio
+  branch: main
+
+# Grava direto no branch (sem pull request). Para revisao antes de publicar,
+# troque para `publish_mode: editorial_workflow`.
+publish_mode: simple
+
+# Sem isso, um campo opcional deixado em branco vira string vazia no
+# frontmatter e derruba a validacao de data/imagem no build.
+output:
+  omit_empty_optional_fields: true
+
+media_folder: src/assets/uploads
+public_folder: /src/assets/uploads
+
+i18n:
+  # Um arquivo por idioma, em pastas irmas (pt/ e en/), com o MESMO nome de
+  # arquivo. É esse nome que liga as duas traducoes.
+  structure: multiple_folders
+  locales: [pt, en]
+  default_locale: pt
+
+collections:
+  # ── Artigos ───────────────────────────────────────────────────────────────
+  - name: blog
+    label: Artigos
+    label_singular: Artigo
+    folder: src/content/blog
+    create: true
+    slug: '{{slug}}'
+    preview_path: 'artigos/{{fields.permalink}}'
+    media_folder: '../../../assets/uploads'
+    public_folder: '../../../assets/uploads'
+    i18n: true
+    format: yaml-frontmatter
+    summary: '{{title}}'
+    sortable_fields: [publishedAt, title, category]
+    view_groups:
+      - label: Categoria
+        field: category
+    fields:
+      - { name: title, label: Título, widget: string, i18n: true }
+      - {
+          name: summary,
+          label: Resumo,
+          widget: text,
+          i18n: true,
+          hint: 'Aparece no card, na busca e no Google. Entre 40 e 320 caracteres.',
+        }
+      - {
+          name: permalink,
+          label: Endereço (URL),
+          widget: string,
+          required: false,
+          i18n: true,
+          pattern: ['^[a-z0-9]+(?:-[a-z0-9]+)*$', 'Só minúsculas sem acento, números e hífen'],
+          hint: 'Opcional. Em branco, usa o nome do arquivo. Use para dar uma URL própria em inglês.',
+        }
+      - {
+          name: category,
+          label: Categoria,
+          widget: select,
+          i18n: duplicate,
+          options:
+            [
+              { label: 'Nutrição', value: nutrition },
+              { label: 'Alimentos', value: foods },
+              { label: 'Saúde', value: health },
+              { label: 'Fitness', value: fitness },
+              { label: 'Receitas', value: recipes },
+              { label: 'Ciência', value: science },
+            ],
+        }
+      - {
+          name: publishedAt,
+          label: Publicado em,
+          widget: datetime,
+          i18n: duplicate,
+          date_format: 'YYYY-MM-DD',
+          time_format: false,
+          picker_utc: true,
+        }
+      - {
+          name: updatedAt,
+          label: Atualizado em,
+          widget: datetime,
+          required: false,
+          i18n: duplicate,
+          date_format: 'YYYY-MM-DD',
+          time_format: false,
+          picker_utc: true,
+        }
+      - {
+          name: author,
+          label: Autoria,
+          widget: relation,
+          required: false,
+          i18n: duplicate,
+          collection: authors,
+          value_field: '{{slug}}',
+          search_fields: [name],
+          display_fields: [name],
+          hint: 'Em branco, o artigo sai assinado pela publicação — a autoridade vem das Referências.',
+        }
+      - {
+          name: reviewer,
+          label: Revisão técnica,
+          widget: relation,
+          required: false,
+          i18n: duplicate,
+          collection: authors,
+          value_field: '{{slug}}',
+          search_fields: [name],
+          display_fields: [name],
+          hint: 'Obrigatório em conteúdo clínico, de suplementação ou com recomendação numérica.',
+        }
+      - { name: cover, label: Capa, widget: image, required: false, i18n: duplicate }
+      - {
+          name: coverAlt,
+          label: Descrição da capa,
+          widget: string,
+          required: false,
+          i18n: true,
+          hint: 'Obrigatório quando há capa. Descreva a imagem para quem não a vê.',
+        }
+      - {
+          name: tags,
+          label: Tags,
+          widget: list,
+          required: false,
+          i18n: true,
+          max: 8,
+          hint: 'Até 8. Usadas para sugerir artigos relacionados.',
+        }
+      - {
+          name: featured,
+          label: Destaque na home,
+          widget: boolean,
+          default: false,
+          i18n: duplicate,
+        }
+      - {
+          name: draft,
+          label: Rascunho,
+          widget: boolean,
+          default: false,
+          i18n: duplicate,
+          hint: 'Rascunho aparece no ambiente local e nunca vai para o site publicado.',
+        }
+      - {
+          name: noindex,
+          label: Ocultar dos buscadores,
+          widget: boolean,
+          default: false,
+          i18n: duplicate,
+        }
+      - name: references
+        label: Fontes científicas
+        widget: list
+        required: false
+        i18n: true
+        summary: '{{fields.title}}'
+        fields:
+          - { name: title, label: Título, widget: string }
+          - {
+              name: url,
+              label: Link,
+              widget: string,
+              pattern: ['^https://', 'A fonte precisa usar https'],
+            }
+          - { name: publisher, label: Publicado por, widget: string, required: false }
+      - name: faq
+        label: Perguntas frequentes
+        widget: list
+        required: false
+        i18n: true
+        max: 10
+        summary: '{{fields.question}}'
+        fields:
+          - { name: question, label: Pergunta, widget: string }
+          - { name: answer, label: Resposta, widget: text }
+      - {
+          name: body,
+          label: Conteúdo,
+          widget: markdown,
+          i18n: true,
+          hint: 'Blocos de destaque: :::dica[Título] ... ::: — também :::atencao e :::nota',
+        }
+
+  # ── Páginas institucionais ────────────────────────────────────────────────
+  - name: pages
+    label: Páginas
+    label_singular: Página
+    folder: src/content/pages
+    create: false
+    delete: false
+    media_folder: '../../../assets/uploads'
+    public_folder: '../../../assets/uploads'
+    i18n: true
+    format: yaml-frontmatter
+    fields:
+      - { name: title, label: Título, widget: string, i18n: true }
+      - { name: description, label: Descrição, widget: text, i18n: true }
+      - {
+          name: updatedAt,
+          label: Atualizado em,
+          widget: datetime,
+          required: false,
+          i18n: duplicate,
+          date_format: 'YYYY-MM-DD',
+          time_format: false,
+          picker_utc: true,
+        }
+      - {
+          name: noindex,
+          label: Ocultar dos buscadores,
+          widget: boolean,
+          default: false,
+          i18n: duplicate,
+        }
+      - { name: body, label: Conteúdo, widget: markdown, i18n: true }
+
+  # ── Autoria ───────────────────────────────────────────────────────────────
+  # Sem pasta por idioma: um arquivo por pessoa, com cargo e bio nos dois
+  # idiomas dentro do proprio arquivo.
+  - name: authors
+    label: Autores
+    label_singular: Autor
+    folder: src/content/authors
+    create: true
+    slug: '{{slug}}'
+    media_folder: '../../assets/uploads'
+    public_folder: '../../assets/uploads'
+    format: yaml-frontmatter
+    summary: '{{name}}'
+    fields:
+      - { name: name, label: Nome, widget: string }
+      - {
+          name: credential,
+          label: Registro profissional,
+          widget: string,
+          required: false,
+          hint: 'Ex.: CRN-3 12345',
+        }
+      - name: role
+        label: Cargo
+        widget: object
+        fields:
+          - { name: pt, label: Português, widget: string }
+          - { name: en, label: English, widget: string }
+      - name: bio
+        label: Minibiografia
+        widget: object
+        fields:
+          - { name: pt, label: Português, widget: text }
+          - { name: en, label: English, widget: text }
+      - { name: avatar, label: Foto, widget: image, required: false }
+      - name: links
+        label: Links
+        widget: object
+        required: false
+        fields:
+          - { name: website, label: Site, widget: string, required: false }
+          - { name: instagram, label: Instagram, widget: string, required: false }
+          - { name: linkedin, label: LinkedIn, widget: string, required: false }

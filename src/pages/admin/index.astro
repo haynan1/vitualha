@@ -1,0 +1,39 @@
+---
+/**
+ * Editor de conteudo (Sveltia CMS).
+ *
+ * É uma rota do Astro, e nao um arquivo solto em public/, por um motivo
+ * pratico: o servidor de desenvolvimento nao resolve indice de diretorio para
+ * arquivos estaticos, entao `/admin/` daria 404 no `npm run dev` e so
+ * funcionaria em producao (onde o Apache resolve DirectoryIndex). Como rota,
+ * o mesmo endereco funciona em dev, no preview e no ar.
+ *
+ * A pagina nao usa BaseLayout de proposito: é a casca de uma aplicacao, nao
+ * uma pagina do site. Sem cabecalho, rodape, canonical nem indexacao.
+ *
+ * O bundle e a configuracao continuam em public/admin/ — servidos do proprio
+ * dominio, com versao travada no package-lock.
+ */
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Editor — Nutrição em Ação</title>
+    <link href="/admin/config.yml" type="text/yaml" rel="cms-config-url" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+
+  <body>
+    <!--
+      is:inline mantem o caminho absoluto intacto: o bundle é um arquivo
+      estatico versionado em public/admin/, nao um modulo para o bundler
+      resolver. Continua sendo script externo, entao a CSP com
+      script-src 'self' segue valendo.
+    -->
+    <script is:inline src="/admin/sveltia-cms.js"></script>
+  </body>
+</html>

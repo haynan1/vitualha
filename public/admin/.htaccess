@@ -1,0 +1,21 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Politica exclusiva do editor (/admin/).
+#
+# O CMS precisa falar com a API do GitHub para ler e gravar conteudo — algo
+# que a CSP do site, deliberadamente restrita a 'self', nao permite. Em vez de
+# afrouxar a politica do site inteiro por causa de uma pasta, a excecao fica
+# isolada aqui.
+# ─────────────────────────────────────────────────────────────────────────────
+
+<IfModule mod_headers.c>
+  Header always set Content-Security-Policy "default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: blob: https://avatars.githubusercontent.com https://*.githubusercontent.com; media-src 'self' blob:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self' https://api.github.com https://github.com https://*.githubusercontent.com; worker-src 'self' blob:"
+
+  # A area de edicao nunca deve aparecer em buscador nem ser arquivada.
+  Header always set X-Robots-Tag "noindex, nofollow, noarchive"
+
+  # O bundle do CMS tem versao fixa no package-lock, mas o caminho é estavel:
+  # precisa revalidar para uma atualizacao chegar ao editor.
+  <FilesMatch "\.(html|yml|js)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>
