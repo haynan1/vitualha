@@ -32,6 +32,51 @@ jobs:
       url: ${{ vars.PUBLIC_SITE_URL }}
 
     steps:
+      # Credencial ausente ou com formato errado so apareceria la na frente,
+      # como timeout do cliente FTP, sem dizer o que corrigir. Conferir antes
+      # troca o timeout por uma instrucao — e roda antes do download do
+      # artefato, para falhar no primeiro segundo do job.
+      #
+      # Nenhum valor é impresso: o teste é de presenca e de formato. O Actions
+      # mascara secrets no log, mas mascaramento é ultima linha de defesa, nao
+      # primeira — o jeito de nao vazar um segredo é nao imprimi-lo.
+      - name: Conferir credenciais antes de conectar
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          SITE_URL: ${{ vars.PUBLIC_SITE_URL }}
+        run: |
+          ausentes=()
+          [ -n "$FTP_SERVER" ]   || ausentes+=("FTP_SERVER")
+          [ -n "$FTP_USERNAME" ] || ausentes+=("FTP_USERNAME")
+          [ -n "$FTP_PASSWORD" ] || ausentes+=("FTP_PASSWORD")
+
+          if [ ${#ausentes[@]} -gt 0 ]; then
+            echo "::error::Secret(s) ausente(s): ${ausentes[*]}"
+            echo "Defina em Settings > Secrets and variables > Actions > aba Secrets."
+            echo "Os valores estao no hPanel da Hostinger, em Arquivos > Contas FTP."
+            exit 1
+          fi
+
+          # Erro comum: colar a URL inteira em vez do host. O cliente tenta
+          # resolver "ftp://host" como nome de maquina e morre por timeout.
+          case "$FTP_SERVER" in
+            *://*)
+              echo "::error::FTP_SERVER inclui esquema de protocolo. Use so o host, sem ftp:// nem https://."
+              exit 1
+              ;;
+          esac
+
+          # Nao é fatal: o astro.config.ts tem dominio padrao. Mas se o dominio
+          # real for outro, o artefato ja subiu com canonical, sitemap, RSS e
+          # JSON-LD apontando para o lugar errado — e isso nao aparece na tela.
+          if [ -z "$SITE_URL" ]; then
+            echo "::warning::PUBLIC_SITE_URL nao definido em Variables — o site foi construido com o dominio padrao do astro.config.ts."
+          fi
+
+          echo "Credenciais presentes e com formato plausivel."
+
       - name: Baixar o site construido
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
