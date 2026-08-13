@@ -43,6 +43,13 @@ jobs:
       - name: Formatacao
         run: npm run format:check
 
+      # O script roda `astro sync` antes do eslint, e isso nao é detalhe: as
+      # regras type-aware do typescript-eslint leem os tipos que o Astro gera
+      # em .astro/ a partir das colecoes de conteudo. Em checkout limpo essa
+      # pasta nao existe, getCollection() vira `any` e o lint reprova em massa
+      # — passando na maquina de quem ja rodou o build alguma vez. A geracao
+      # de tipos vive no script, e nao aqui, para que um clone novo tenha o
+      # mesmo resultado em qualquer lugar.
       - name: Lint
         run: npm run lint
 
