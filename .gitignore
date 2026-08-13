@@ -45,3 +45,8 @@ coverage/
 # quem mantem o site, nao o projeto. Quem clonar o repositorio encontra o que
 # precisa em README.md e ARCHITECTURE.md.
 PENDENCIAS.md
+
+# Prints e rascunhos passados de mao para o assistente. Ancorado na raiz e
+# so como diretorio: `temp` solto tambem esconderia um src/.../temp/ criado
+# por engano, e arquivo que some sem avisar é o pior tipo de arquivo perdido.
+/temp/
