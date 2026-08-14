@@ -18,7 +18,7 @@ publicado automaticamente na Hostinger a cada push.
 | Markdown  | **unified (remark/rehype)**               | O padrão do Astro 7 é o Sätteri, mais rápido, mas ainda sem suporte a _directives_ — a base dos blocos `:::dica` que o editor usa. Aqui o build é dominado por otimização de imagem, não por parse de Markdown, então a troca não compensaria. Reavaliar quando o ecossistema do Sätteri cobrir directives, âncora de título e wrapper de tabela. |
 | Busca     | **Pagefind**                              | Índice estático gerado no fim do build e consultado no navegador via WebAssembly. Sem servidor de busca para manter, pagar ou proteger; a consulta do leitor não sai do dispositivo. Algolia custaria mensalidade e enviaria dados de leitura para terceiro.                                                                                      |
 | Fontes    | **@fontsource-variable, auto-hospedadas** | Manrope (títulos) e Inter (texto). Servidas do próprio domínio: uma requisição a terceiro a menos, nenhum vazamento de IP do leitor para o Google e `font-src 'self'` na CSP. Só os subsets latin e latin-ext são declarados.                                                                                                                     |
-| Imagens   | **`astro:assets` + sharp**                | AVIF/WebP responsivos gerados no build. Capa ausente cai num gradiente derivado da categoria — a grade nunca quebra.                                                                                                                                                                                                                              |
+| Imagens   | **`astro:assets` + sharp**                | WebP responsivo gerado no build, em várias larguras. Capa ausente cai num gradiente derivado da categoria — a grade nunca quebra.                                                                                                                                                                                                                 |
 | Deploy    | **GitHub Actions → FTPS**                 | O artefato publicado é exatamente o que passou pela CI. Envio incremental: publicar um artigo não reenvia o site inteiro.                                                                                                                                                                                                                         |
 | Receita   | **Google AdSense, sob configuração**      | É a única rede que paga sem exigir tráfego mínimo, e a integração inteira é opcional: sem `PUBLIC_ADSENSE_CLIENT` o site não carrega nada de terceiro e volta a ser o que era. Rede com mediação (Ezoic, Mediavine) exige volume que o site ainda não tem e devolve o controle do `<head>` para um script externo.                                |
 
@@ -49,7 +49,7 @@ src/
 │   ├── blog/pt/…     um arquivo por idioma, MESMO nome = mesma tradução
 │   ├── blog/en/…
 │   ├── pages/        sobre, contato, privacidade, termos, política editorial
-│   └── authors/      autoria e revisão técnica
+│   └── authors/      autoria e revisão técnica — hoje vazia, ver 3.6
 ├── lib/              regras de negócio (índice por idioma, SEO, datas, feed)
 │   └── article-model.ts   ← núcleo puro e testado, sem dependência do Astro
 ├── components/       peças de interface
@@ -144,12 +144,50 @@ prova de confiança fica com as fontes listadas em `references`, que o leitor
 pode conferir uma a uma. `reviewer` continua sendo o sinal forte em conteúdo
 clínico.
 
+**Hoje esse é o caso de todos os artigos:** `src/content/authors/` está vazia,
+mantida no Git por um `.gitkeep`. O caminho opcional deixou de ser exceção e
+passou a ser o padrão do site, o que valida a decisão — a alternativa seria
+ter fichas de fachada só para preencher um campo.
+
+Enquanto a pasta estiver vazia o build avisa
+`No files found matching "**/*.md"`. É verdadeiro e some com a primeira ficha;
+calá-lo exigiria remover a coleção inteira, o que custaria mais do que vale.
+
 ### 3.7 Onde mora a regra de negócio
 
 `src/lib/article-model.ts` é puro: funções sobre dados simples, sem importar
 `astro:content`. É onde estão as decisões que realmente podem quebrar o site
 (fallback de idioma, ordenação, slug, relacionados) e é por isso que dá para
 testá-las em milissegundos, sem build.
+
+### 3.8 Um feed por idioma, apresentável no navegador
+
+`src/lib/feed.ts` gera um feed por idioma. Um feed único obrigaria o assinante
+a receber metade do conteúdo numa língua que talvez não leia; artigos exibidos
+por fallback ficam de fora do feed em inglês pela mesma razão.
+
+Três decisões que não são padrão do `@astrojs/rss`:
+
+- **Folha XSLT** (`public/rss/styles.xsl`). Sem ela o navegador mostra a árvore
+  XML crua, precedida de "This XML file does not appear to have any style
+  information" — parece defeito do site, e não um endereço para assinar. A
+  transformação é do navegador: nenhum agregador a lê, e o XML servido é o
+  mesmo. É bilíngue pelo `<language>` do canal, então um arquivo atende os
+  dois feeds.
+- **`lastBuildDate` com a data do artigo mais recente**, e não a hora do build.
+  Do contrário todo deploy — inclusive o que só mexe em CSS — anunciaria
+  novidade a quem assina, e leitor que cria fama de gritar lobo passa a ser
+  consultado com menos frequência.
+- **`dc:creator` em vez do `author` do RSS 2.0.** A especificação define aquele
+  campo como endereço de e-mail; publicar o e-mail de quem assina em todo
+  agregador não é aceitável.
+
+`customData` não é sanitizado pela biblioteca, então todo texto interpolado
+passa por escape — um `&` vindo de um nome quebraria o feed inteiro, e feed
+quebrado desaparece do leitor sem avisar.
+
+A folha exige `AddType application/xslt+xml .xsl` no `.htaccess`: servida como
+texto, o navegador a ignora e o aviso volta.
 
 ---
 
@@ -191,8 +229,9 @@ Restrições de projeto, não otimização posterior:
   independentes: tema, sumário e busca (esta só carrega ao digitar).
 - **Fonte pré-carregada** com caminho estável — um caminho com hash não
   poderia ser pré-carregado no `<head>`.
-- **Imagens responsivas** em AVIF/WebP, com `eager` apenas na capa acima da
-  dobra e `lazy` no resto.
+- **Imagens responsivas** em WebP, com `eager` apenas na capa acima da dobra e
+  `lazy` no resto. O `.htaccess` já serve AVIF corretamente caso o pipeline
+  passe a gerá-lo; hoje não gera.
 - **Cache imutável de um ano** para tudo com nome hasheado; HTML sempre
   revalidado, para um artigo novo aparecer na hora.
 - **Sem CSS inline**, para a CSP poder exigir `style-src 'self'` na origem.
@@ -269,21 +308,45 @@ conteúdo aparece como deploy vermelho, e não na tela de quem escreveu.
 ## 9. Deploy
 
 Push em `main` dispara a CI (formatação, lint, tipos, testes, auditoria,
-build, verificação do `dist/`). Só o artefato aprovado é enviado por FTPS
-para `public_html/`.
+build, verificação do `dist/`). Só o artefato aprovado é enviado por FTPS para
+a pasta indicada em `FTP_SERVER_DIR`.
 
 Segredos necessários em **Settings → Secrets and variables → Actions**:
 
-| Tipo     | Nome                       | Valor                       |
-| -------- | -------------------------- | --------------------------- |
-| Secret   | `FTP_SERVER`               | host FTP da Hostinger       |
-| Secret   | `FTP_USERNAME`             | usuário FTP                 |
-| Secret   | `FTP_PASSWORD`             | senha FTP                   |
-| Variable | `PUBLIC_SITE_URL`          | `https://seudominio.com.br` |
-| Variable | `PUBLIC_NEWSLETTER_ACTION` | opcional                    |
-| Variable | `PUBLIC_ANALYTICS_SRC`     | opcional                    |
-| Variable | `PUBLIC_ADSENSE_CLIENT`    | opcional — `ca-pub-…`       |
-| Variable | `PUBLIC_ADSENSE_SLOT_*`    | opcional — um por posição   |
+| Tipo     | Nome                       | Valor                                |
+| -------- | -------------------------- | ------------------------------------ |
+| Secret   | `FTP_SERVER`               | host FTP da Hostinger, sem `ftp://`  |
+| Secret   | `FTP_USERNAME`             | usuário FTP                          |
+| Secret   | `FTP_PASSWORD`             | senha FTP                            |
+| Variable | `PUBLIC_SITE_URL`          | `https://seudominio.com.br`          |
+| Variable | `FTP_SERVER_DIR`           | pasta de destino, com barra no final |
+| Variable | `PUBLIC_NEWSLETTER_ACTION` | opcional                             |
+| Variable | `PUBLIC_ANALYTICS_SRC`     | opcional                             |
+| Variable | `PUBLIC_ADSENSE_CLIENT`    | opcional — `ca-pub-…`                |
+| Variable | `PUBLIC_ADSENSE_SLOT_*`    | opcional — um por posição            |
+
+**`FTP_SERVER_DIR` é o campo que mais custou neste projeto.** O destino
+depende do arranjo da hospedagem, não do código: conta FTP da raiz usa
+`public_html/`, domínio adicional usa `domains/exemplo.com/public_html/`, e
+conta já apontada para a pasta do site usa `./`. Neste projeto o valor é
+`/domains/vitualha.com/public_html/`.
+
+Errar isso não produz erro: o FTP grava com sucesso em qualquer pasta onde
+consiga escrever, devolve verde, e o site continua servindo a versão antiga.
+Foi o que aconteceu por dois dias — ver `RELATORIO.md`.
+
+Daí duas defesas no `deploy.yml`:
+
+- **Preflight de credenciais**, antes de qualquer conexão: secret ausente ou
+  `FTP_SERVER` com esquema de protocolo falham com instrução, e não com
+  timeout do cliente FTP dez minutos depois.
+- **Verificação pós-envio**: o job busca `/robots.txt` no domínio e reprova se
+  a resposta não vier deste build. "Deploy verde" passou a significar "site no
+  ar", e não "arquivo em algum lugar do servidor".
+
+Quando o destino se perder, `diagnostico-ftp.yml` (manual, só leitura) mapeia
+a árvore do servidor — `pwd`, `ls`, `find` — em vez de descobrir o caminho por
+tentativa. Cada chute errado deixa uma cópia completa do site numa pasta órfã.
 
 **Ligando o AdSense.** Enquanto a conta não sai, nada precisa ser feito: sem
 `PUBLIC_ADSENSE_CLIENT` o site não carrega nada do Google. Quando o painel

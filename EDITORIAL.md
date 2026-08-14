@@ -75,9 +75,29 @@ automaticamente, sem empurrar a página para o lado.
 
 ## Imagens
 
-Coloque o arquivo em `src/assets/uploads/` (ou use o botão de upload do
-editor) e referencie por caminho relativo. O build gera AVIF e WebP em vários
-tamanhos. Toda imagem precisa de texto alternativo.
+Coloque o arquivo em `src/assets/uploads/` — ou use o botão de upload do
+editor, que faz isso sozinho — e referencie **por caminho relativo ao artigo**:
+
+```markdown
+![Descrição do que a imagem mostra](../../../assets/uploads/foto.jpg)
+```
+
+Caminho começando com barra (`/src/assets/…`) não dá erro no build e quebra no
+site: a imagem sai sem otimização, apontando para um endereço que não existe.
+O `verify-build` passou a reprovar esse caso, mas o hábito certo evita a ida e
+volta.
+
+O build converte tudo para **WebP** e gera várias larguras — três para a capa,
+até nove no corpo do texto. Suba JPG para fotografia e PNG para gráfico com
+texto ou linhas nítidas.
+
+**Largura de 1600 px é o teto útil.** A maior variante que o layout chega a
+exibir tem 1440 px; um original de 3000 px gera 10,4 MB de variantes contra
+2,2 MB de um de 1600 px, sem um pixel a mais na tela.
+
+Toda imagem precisa de texto alternativo. Capa sem `coverAlt` reprova o build.
+
+Passo a passo completo em **[MANUAL.md](MANUAL.md)**, seção 5A.
 
 ---
 
