@@ -14,12 +14,13 @@ Para o estado da hospedagem e credenciais, ver `RELATORIO.md`.
 2. [Escrever pelo editor visual](#2-escrever-pelo-editor-visual)
 3. [Escrever por arquivo](#3-escrever-por-arquivo)
 4. [Os campos do artigo](#4-os-campos-do-artigo)
-5. [Escrever bem no editor](#5-escrever-bem-no-editor)
+5. [Escrever bem no editor](#5-escrever-bem-no-editor) · [Imagens](#5a-imagens)
 6. [Publicar](#6-publicar)
 7. [Traduzir](#7-traduzir)
 8. [Editar de qualquer lugar](#8-editar-de-qualquer-lugar)
 9. [Manutenção](#9-manutenção)
 10. [Quando algo dá errado](#10-quando-algo-dá-errado)
+11. [A home](#11-a-home)
 
 ---
 
@@ -154,7 +155,7 @@ melhor quebrar na publicação do que publicar dado inválido.
 | `category`    | sim         | `nutrition` `foods` `health` `fitness` `recipes` `science` |
 | `publishedAt` | sim         | data — `2026-08-14`                                        |
 | `updatedAt`   | não         | data da última revisão                                     |
-| `author`      | não         | nome do arquivo em `authors/`, ex. `camila-ferreira`       |
+| `author`      | não         | nome do arquivo em `authors/` — ainda não há fichas        |
 | `reviewer`    | não         | quem revisou tecnicamente                                  |
 | `cover`       | não         | imagem de capa — **exige `coverAlt`**                      |
 | `coverAlt`    | com capa    | descrição da imagem, mínimo 5 caracteres                   |
@@ -227,24 +228,112 @@ Texto normal, com **negrito** e _itálico_.
 ### Subtítulo menor
 ```
 
-### Imagens
-
-Pelo editor visual, use o botão de imagem — ele cuida do caminho.
-
-Por arquivo:
-
-```markdown
-![Descrição do que a imagem mostra](/src/assets/uploads/foto.jpg)
-```
-
-**Sempre descreva a imagem.** O texto entre colchetes é o que leitores de tela
-anunciam e o que aparece se a imagem não carregar. Deixar vazio é aceitável
-apenas em imagem puramente decorativa.
-
 ### Índice automático
 
 Os `##` viram o índice lateral do artigo, sozinhos. Use-os para dividir o
 texto em blocos — ajuda o leitor e ajuda a busca.
+
+---
+
+## 5A. Imagens
+
+As imagens moram em `src/assets/uploads/`. Não em `public/` — a diferença
+importa: só o que está em `src/assets/` passa pelo otimizador.
+
+### Onde colocar no texto
+
+Pelo editor visual, use o botão de imagem. Ele grava o caminho certo sozinho.
+
+Por arquivo, o caminho é **relativo ao artigo**, com três níveis de subida:
+
+```markdown
+![Descrição do que a imagem mostra](../../../assets/uploads/foto.jpg)
+```
+
+Os `../../../` saem de `src/content/blog/pt/` e chegam em `src/assets/`. Vale
+para artigos nos dois idiomas, porque a profundidade é a mesma.
+
+**Não use caminho começando com barra.** `/src/assets/uploads/foto.jpg` não
+dá erro no build, não aparece em teste nenhum, e quebra no site: a imagem sai
+sem otimização, apontando para um endereço que não existe. Testado.
+
+### Quantas quiser, onde quiser
+
+Não há limite nem posição fixa. Cada `![...]` no meio do texto vira uma
+imagem otimizada:
+
+```markdown
+## O que a evidência mostra
+
+![Gráfico da relação entre dose e resposta](../../../assets/uploads/dose-resposta.jpg)
+
+Texto que segue depois da imagem.
+
+## Como aplicar na prática
+
+![Prato montado com as proporções descritas](../../../assets/uploads/prato.jpg)
+```
+
+### Capa
+
+A capa é campo do frontmatter, não do corpo, e exige descrição:
+
+```yaml
+cover: ../../../assets/uploads/capa.jpg
+coverAlt: Descrição do que a capa mostra
+```
+
+Ela aparece no topo do artigo, no card da listagem e no destaque da home. Sem
+capa, o card mostra um gradiente derivado da cor da categoria — não fica
+buraco.
+
+### Sempre descreva a imagem
+
+O texto entre colchetes é o que leitores de tela anunciam e o que aparece se a
+imagem não carregar. Deixar vazio só se a imagem for puramente decorativa.
+
+Na capa isso é obrigatório: `cover` sem `coverAlt` derruba o build de
+propósito.
+
+### Que formato subir
+
+Suba **JPG** para fotografia e **PNG** para gráfico, diagrama ou qualquer
+imagem com texto e linhas nítidas. SVG serve para ícone e logotipo.
+
+Não se preocupe com o formato final: o build converte tudo para **WebP** e
+gera de sete a nove larguras diferentes, servindo a menor que couber na tela
+de quem lê. Você sobe uma imagem; o navegador escolhe a versão certa.
+
+O pipeline também aceita HEIC — o formato que o iPhone usa por padrão — mas
+converter para JPG antes de subir evita surpresa e mantém o repositório legível
+para qualquer editor.
+
+### Que tamanho subir
+
+**Largura de 1600 px, qualidade 85–90.** Esse é o número que importa.
+
+O motivo é medido, não estimado. A maior variante que o layout chega a exibir
+tem 1440 px (a capa do artigo); no corpo, a coluna de texto é bem mais
+estreita. Subir além disso não melhora nada na tela e cobra caro no build:
+
+| Origem  | Peso gerado no site | Ganho visível |
+| ------- | ------------------- | ------------- |
+| 3000 px | 10,4 MB             | nenhum        |
+| 1600 px | 2,2 MB              | idêntico      |
+
+Quase cinco vezes mais peso, pixel nenhum a mais na tela. Um artigo com quatro
+fotos de 3000 px carrega 40 MB de variantes para o servidor sem que ninguém
+veja diferença.
+
+**Como redimensionar antes de subir:** qualquer editor serve. No Windows,
+Fotos → Redimensionar → Personalizado → largura 1600. No celular, a maioria
+dos apps de foto tem "exportar em tamanho médio".
+
+### Peso do arquivo
+
+Depois de redimensionar para 1600 px, um JPG de foto costuma ficar entre 200
+e 500 KB. Acima de 1 MB, provavelmente a qualidade está em 100 — baixe para
+85 e compare: a diferença é invisível e o arquivo cai pela metade.
 
 ---
 
@@ -548,6 +637,102 @@ git checkout <hash> -- src/content/blog/pt/creatina-o-que-a-ciencia-diz.md
 ```
 
 Depois `commit` e `push` normalmente.
+
+---
+
+## 11. A home
+
+**A home não tem arquivo de conteúdo, e isso é de propósito.** Ela se monta
+sozinha a partir dos artigos publicados. Você nunca escolhe manualmente o que
+aparece ali — escolhe pelas marcações nos artigos.
+
+Se houvesse uma lista fixa, publicar um artigo exigiria dois passos, e o
+segundo seria esquecido. Assim a home nunca fica desatualizada.
+
+### Como ela se articula
+
+De cima para baixo:
+
+| Bloco                 | O que entra                        | Quantos |
+| --------------------- | ---------------------------------- | ------- |
+| **Destaque grande**   | o primeiro artigo da fila          | 1       |
+| **Em destaque**       | os próximos da fila                | 3       |
+| **Categorias**        | as seis categorias fixas           | 6       |
+| _(espaço de anúncio)_ | só aparece com AdSense configurado | —       |
+| **Últimos artigos**   | os seguintes da fila               | 8       |
+| **Newsletter**        | formulário ou convite para contato | —       |
+
+### A fila
+
+A ordem é decidida assim:
+
+1. Artigos com `featured: true` vêm primeiro, do mais novo para o mais antigo.
+2. Depois, todos os outros, também do mais novo para o mais antigo.
+
+Dessa fila única saem, em sequência: o **destaque grande** (o primeiro), os
+**3 em destaque** (os seguintes) e os **8 últimos** (os seguintes). O botão
+"Ver todos os artigos" aparece sozinho quando sobra algo além dos 12.
+
+### Como controlar o que aparece
+
+**Para colocar um artigo no topo:** marque `featured: true` no frontmatter. Se
+mais de um estiver marcado, o mais recente fica com o destaque grande.
+
+**Para tirar do topo:** troque para `featured: false` ou apague a linha.
+
+**Para mudar a ordem entre destaques:** ajuste o `publishedAt`. A data manda
+dentro de cada grupo.
+
+**Atenção ao marcar muitos.** Com cinco artigos em `featured: true`, os quatro
+primeiros ocupam o destaque grande e o bloco "Em destaque", e o quinto cai em
+"Últimos artigos" — onde ele estaria de qualquer jeito. Marcar tudo equivale a
+não marcar nada.
+
+### Mudar quantos aparecem
+
+Em `src/config/site.ts`:
+
+```ts
+export const HOME_LAYOUT = {
+  featured: 3, // cartões do bloco "Em destaque"
+  latest: 8, // cartões do bloco "Últimos artigos"
+  related: 3, // relacionados no fim de cada artigo
+} as const;
+```
+
+O destaque grande é sempre um só.
+
+### Mudar os textos
+
+Em `src/i18n/ui.ts`, bloco `home` — há um para `pt` e outro para `en`:
+
+```ts
+home: {
+  heroEyebrow: 'Em destaque',
+  heroCta: 'Ler artigo',
+  featuredTitle: 'Artigos em destaque',
+  categoriesTitle: 'Explore por categoria',
+  categoriesSubtitle: 'Navegue pelos temas que mais interessam a você.',
+  latestTitle: 'Últimos artigos',
+  latestSubtitle: 'Conteúdo novo, baseado em evidências, publicado com frequência.',
+  viewAllBtn: 'Ver todos os artigos',
+  empty: 'Ainda não há artigos publicados.',
+},
+```
+
+O título e a descrição que o Google mostra ficam logo abaixo, em `meta`:
+`homeTitle` e `homeDescription`.
+
+### Mudar a ordem ou remover um bloco
+
+A estrutura vive em `src/views/HomeView.astro`. Cada bloco é uma `<section>`
+independente — reordenar é mover o trecho, remover é apagá-lo. É o único
+arquivo da home que exige mexer em código.
+
+### Categorias
+
+As seis são fixas, definidas em `src/config/categories.ts` com nome, cor e
+letra de cada uma. Aparecem sempre, mesmo sem artigo publicado na categoria.
 
 ---
 
