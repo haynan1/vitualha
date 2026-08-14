@@ -112,6 +112,11 @@ jobs:
           # compartilhadas; FTP puro enviaria a senha em texto claro.
           protocol: ftps
           port: 21
+          # O padrao da acao é 30s, e foi exatamente onde o envio morreu com
+          # "Timeout (control socket)". A propria Hostinger orienta a subir o
+          # tempo limite do cliente quando o servidor compartilhado demora a
+          # responder — o gargalo é a fila do servidor, nao a rede do runner.
+          timeout: 120000
           local-dir: ./dist/
           # Configuravel porque o caminho depende do arranjo da hospedagem, e
           # nao do projeto: conta FTP da raiz usa public_html/, dominio
