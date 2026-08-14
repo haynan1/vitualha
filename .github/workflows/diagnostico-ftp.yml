@@ -47,28 +47,46 @@ jobs:
             echo 'set net:timeout 30'
             echo 'set net:max-retries 2'
             echo "open -u \"$FTP_USERNAME\",\"$FTP_PASSWORD\" \"$FTP_SERVER\""
-            echo 'echo ===PWD==='
+            # A pasta onde a conta cai ja foi mapeada e contem uma copia do
+            # site que o dominio nao serve. O que falta é subir na hierarquia:
+            # se a conta nao estiver presa (chroot), a pasta real do dominio
+            # aparece em domains/<dominio>/public_html/.
+            #
+            # Caminhos que contenham o nome de usuario saem mascarados como
+            # *** no log — o Actions nao sabe distinguir caminho de segredo.
+            # Por isso o que interessa aqui sao os NOMES das pastas listadas,
+            # que reconstroem o caminho sem depender do pwd sair legivel.
+            echo 'echo ===PWD-DO-LOGIN==='
             echo 'pwd'
-            echo 'echo ===RAIZ==='
+            echo 'echo ===PASTA-PAI==='
+            echo 'cd ..'
+            echo 'pwd'
             echo 'cls -l --sort=name'
-            echo 'echo ===ARVORE==='
+            echo 'echo ===DOIS-NIVEIS-ACIMA==='
+            echo 'cd ..'
+            echo 'pwd'
+            echo 'cls -l --sort=name'
+            echo 'echo ===RAIZ-ABSOLUTA==='
+            echo 'cd /'
+            echo 'pwd'
+            echo 'cls -l --sort=name'
+            echo 'echo ===ARVORE-A-PARTIR-DA-RAIZ==='
             echo 'find -d 3'
             echo 'bye'
           } > "$roteiro"
 
-          lftp -f "$roteiro" | tee "$saida"
+          # Um `cd` recusado nao é falha do diagnostico: conta presa em chroot
+          # é justamente uma das respostas que este job existe para dar.
+          lftp -f "$roteiro" 2>&1 | tee "$saida" || true
 
           echo ""
           echo "================================================================"
           echo "  Candidatos a raiz do site"
           echo "================================================================"
           echo ""
-          # O index.html que o dominio serve hoje é o mockup de 584 KB
-          # (598527 bytes, conferido pelo Etag da resposta HTTP). Achar um
-          # arquivo desse tamanho identifica a pasta certa sem ambiguidade —
-          # é mais confiavel que deduzir o caminho pelo nome.
-          grep -iE 'index\.html$|^\./domains|public_html' "$saida" | head -60 || true
+          grep -inE 'domains|public_html|index\.html|default\.php' "$saida" | head -80 || true
 
           echo ""
-          echo "Use o caminho da pasta que contem o index.html de ~598527 bytes"
-          echo "como Variable FTP_SERVER_DIR, sempre com barra no final."
+          echo "A pasta certa é a que contem o index.html de ~598527 bytes (o"
+          echo "mockup que o dominio serve hoje) ou o default.php da Hostinger."
+          echo "Esse caminho vira a Variable FTP_SERVER_DIR, com barra no final."
