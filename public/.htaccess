@@ -141,8 +141,16 @@ ErrorDocument 404 /404.html
     Header set Cache-Control "public, max-age=0, must-revalidate"
   </FilesMatch>
 
+  # Todo .xml do site tem caminho fixo e conteudo que muda — rss.xml e os
+  # sitemaps. Sem must-revalidate o CDN serve a copia velha ate o TTL vencer:
+  # um artigo publicado agora so aparecia no feed uma hora depois.
   <FilesMatch "\.xml$">
-    Header set Cache-Control "public, max-age=3600"
+    Header set Cache-Control "public, max-age=3600, must-revalidate"
+  </FilesMatch>
+
+  # Mesma razao: a folha muda junto com o feed que ela apresenta.
+  <FilesMatch "\.xsl$">
+    Header set Cache-Control "public, max-age=3600, must-revalidate"
   </FilesMatch>
 </IfModule>
 
