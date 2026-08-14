@@ -123,6 +123,12 @@ jobs:
           # adicional usa domains/exemplo.com/public_html/, e conta FTP criada
           # ja apontada para a pasta do site usa ./ — o valor certo é o que o
           # hPanel mostra em Contas FTP. Fixar isso no codigo custou um dia.
+          #
+          # Neste projeto o valor correto é /domains/vitualha.com/public_html/,
+          # definido na Variable. O padrao public_html/ abaixo esta errado para
+          # esta conta e fica so como rede de seguranca: a conta cai dentro de
+          # /public_html, entao public_html/ criaria /public_html/public_html/.
+          # Descobrir isso exigiu ler o servidor — ver diagnostico-ftp.yml.
           server-dir: ${{ vars.FTP_SERVER_DIR || 'public_html/' }}
           # A acao mantem um estado no servidor e envia so o que mudou —
           # um artigo novo nao reenvia o site inteiro.
