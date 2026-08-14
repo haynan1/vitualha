@@ -1,0 +1,74 @@
+name: Diagnostico FTP
+
+# Mapeia o servidor por leitura, sem escrever nada, para descobrir qual pasta
+# o dominio realmente serve. Existe porque o alternativa era chutar o caminho
+# no FTP_SERVER_DIR: cada chute errado deixa uma copia inteira do site numa
+# pasta orfa, ocupando espaco e inode, e sem dizer onde estava o certo.
+#
+# Manual de proposito (workflow_dispatch): nao roda em push, nao participa do
+# deploy, e so gasta conexao quando alguem esta investigando.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mapear:
+    name: Mapear o servidor
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Instalar o lftp
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      # Todo acesso é de leitura: pwd, ls e find. Nenhum comando escreve,
+      # remove ou renomeia — rodar isto nao pode piorar o estado do servidor.
+      #
+      # A senha vai num arquivo temporario do runner em vez da linha de
+      # comando, que ficaria visivel em `ps`. O runner é efemero e o Actions
+      # mascara secrets na saida, mas nenhum dos dois é motivo para expor.
+      - name: Listar a arvore e achar a raiz do site
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          set -euo pipefail
+          roteiro="$(mktemp)"
+          saida="$(mktemp)"
+          trap 'rm -f "$roteiro" "$saida"' EXIT
+
+          {
+            echo 'set ssl:verify-certificate no'
+            echo 'set ftp:ssl-force true'
+            echo 'set ftp:ssl-protect-data true'
+            echo 'set net:timeout 30'
+            echo 'set net:max-retries 2'
+            echo "open -u \"$FTP_USERNAME\",\"$FTP_PASSWORD\" \"$FTP_SERVER\""
+            echo 'echo ===PWD==='
+            echo 'pwd'
+            echo 'echo ===RAIZ==='
+            echo 'cls -l --sort=name'
+            echo 'echo ===ARVORE==='
+            echo 'find -d 3'
+            echo 'bye'
+          } > "$roteiro"
+
+          lftp -f "$roteiro" | tee "$saida"
+
+          echo ""
+          echo "================================================================"
+          echo "  Candidatos a raiz do site"
+          echo "================================================================"
+          echo ""
+          # O index.html que o dominio serve hoje é o mockup de 584 KB
+          # (598527 bytes, conferido pelo Etag da resposta HTTP). Achar um
+          # arquivo desse tamanho identifica a pasta certa sem ambiguidade —
+          # é mais confiavel que deduzir o caminho pelo nome.
+          grep -iE 'index\.html$|^\./domains|public_html' "$saida" | head -60 || true
+
+          echo ""
+          echo "Use o caminho da pasta que contem o index.html de ~598527 bytes"
+          echo "como Variable FTP_SERVER_DIR, sempre com barra no final."
