@@ -69,10 +69,19 @@ jobs:
           }
 
           # ---- 1. Levantar o que existe, sem apagar nada ainda ----
+          # `cls` com um caminho devolve o caminho inteiro de cada item, e nao
+          # so o nome — entao a saida ja é a lista de alvos absolutos. Prefixar
+          # de novo geraria /public_html//public_html/..., que nao existe.
+          #
+          # `.` e `..` vem na listagem e precisam sair AQUI. Um `..` que passe
+          # resolve para a pasta de cima e leva junto o que nao devia: foi
+          # exatamente assim que a primeira versao apagou /public_html inteira
+          # em vez de apenas esvazia-la.
           { cabecalho; echo 'cls -1 -a /public_html/'; echo 'bye'; } > "$conectar"
           lftp -f "$conectar" \
             | sed 's#/$##' \
-            | grep -vE '^\.\.?$' \
+            | grep -vE '(^|/)\.\.?$' \
+            | grep -E '^/public_html/.+' \
             | grep -vE '^[[:space:]]*$' > "$alvos" || true
 
           total=$(wc -l < "$alvos")
@@ -102,9 +111,12 @@ jobs:
             cabecalho
             while IFS= read -r item; do
               [ -n "$item" ] || continue
-              echo "echo -- removendo /public_html/$item"
-              echo "rm -rf \"/public_html/$item\""
+              echo "echo -- removendo $item"
+              echo "rm -rf \"$item\""
             done < "$alvos"
+            # /public_html é o diretorio inicial da conta FTP: esvaziar é o
+            # objetivo, remover nao. Recriar é barato e idempotente.
+            echo 'mkdir -f /public_html'
             echo 'echo ===SOBROU==='
             echo 'cls -1 -a /public_html/'
             echo 'bye'
