@@ -114,14 +114,37 @@ jobs:
               echo "echo -- removendo $item"
               echo "rm -rf \"$item\""
             done < "$alvos"
-            # /public_html é o diretorio inicial da conta FTP: esvaziar é o
-            # objetivo, remover nao. Recriar é barato e idempotente.
-            echo 'mkdir -f /public_html'
             echo 'echo ===SOBROU==='
             echo 'cls -1 -a /public_html/'
             echo 'bye'
           } > "$roteiro"
 
+          lftp -f "$roteiro" 2>&1 || true
+
+      # /public_html é o diretorio inicial da conta FTP: esvaziar é o objetivo,
+      # remover nao. Passo proprio porque o job sai cedo quando nao ha nada a
+      # apagar — e a pasta precisa existir tambem nesse caminho.
+      - name: Garantir que /public_html existe, vazia
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          set -euo pipefail
+          roteiro="$(mktemp)"
+          trap 'rm -f "$roteiro"' EXIT
+          {
+            echo 'set ssl:verify-certificate no'
+            echo 'set ftp:ssl-force true'
+            echo 'set ftp:ssl-protect-data true'
+            echo 'set net:timeout 30'
+            echo 'set net:max-retries 2'
+            echo "open -u \"$FTP_USERNAME\",\"$FTP_PASSWORD\" \"$FTP_SERVER\""
+            echo 'mkdir -f /public_html'
+            echo 'echo ===HOME-DEPOIS==='
+            echo 'cls -l --sort=name /'
+            echo 'bye'
+          } > "$roteiro"
           lftp -f "$roteiro" 2>&1 || true
 
       # A prova de que a limpeza acertou o alvo: o site tem que continuar
