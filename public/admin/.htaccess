@@ -5,6 +5,18 @@
 # que a CSP do site, deliberadamente restrita a 'self', nao permite. Em vez de
 # afrouxar a politica do site inteiro por causa de uma pasta, a excecao fica
 # isolada aqui.
+#
+# LOGIN PELO NAVEGADOR (sveltia-cms-auth): o fluxo OAuth acontece numa janela
+# separada, que a CSP desta pagina nao governa — entao normalmente nada muda
+# aqui. Se o login abrir, autorizar e voltar sem conectar, acrescente a origem
+# do Worker ao connect-src abaixo:
+#
+#   connect-src 'self' https://api.github.com https://github.com
+#               https://*.githubusercontent.com
+#               https://sveltia-cms-auth.SEU-SUBDOMINIO.workers.dev
+#
+# Some a origem exata, nunca https://*.workers.dev: esse coringa autorizaria
+# qualquer Worker de qualquer pessoa a conversar com o editor.
 # ─────────────────────────────────────────────────────────────────────────────
 
 <IfModule mod_headers.c>

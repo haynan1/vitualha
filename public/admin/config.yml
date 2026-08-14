@@ -21,6 +21,18 @@ backend:
   name: github
   repo: haynan1/vitualha
   branch: main
+  # Descomente com a URL do seu Cloudflare Worker (sveltia-cms-auth) para
+  # liberar o login pelo navegador, inclusive no celular. Sem esta linha o
+  # editor remoto cai no provedor OAuth da Netlify, que nao esta configurado.
+  #
+  # Nao é segredo: é so o endereco do proxy que conduz o OAuth. O Client
+  # Secret vive no Worker, nunca aqui — este arquivo é servido publicamente
+  # em /admin/config.yml.
+  #
+  # Depois de preencher, some a mesma origem ao connect-src do
+  # public/admin/.htaccess. Passo a passo em MANUAL.md.
+  #
+  # base_url: https://sveltia-cms-auth.SEU-SUBDOMINIO.workers.dev
 
 # Grava direto no branch (sem pull request). Para revisao antes de publicar,
 # troque para `publish_mode: editorial_workflow`.

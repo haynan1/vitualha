@@ -243,15 +243,26 @@ O caminho padrão é local: `npm run dev`, abrir `/admin/`, clicar em
 **Work with Local Repository**, escolher a pasta do projeto. Sem login, sem
 servidor — o CMS grava direto nos arquivos `.md`, e depois é `git push`.
 
-Para editar do celular ou de outra máquina, sem o projeto instalado:
+Para editar do celular ou de outra máquina, sem o projeto instalado, o editor
+precisa de um intermediário que conduza o login: o segredo do OAuth não pode
+morar numa página pública. Esse papel é do `sveltia-cms-auth`, que roda como
+Cloudflare Worker gratuito.
 
-1. Em `public/admin/config.yml`, troque `repo:` pelo caminho real do
-   repositório.
-2. Crie um OAuth App no GitHub e publique um proxy de autenticação
-   (`sveltia-cms-auth` roda como Cloudflare Worker gratuito).
-3. Acrescente `base_url` (e `auth_endpoint`, se aplicável) ao bloco `backend`.
+1. Publique o `sveltia-cms-auth` na Cloudflare e anote a URL do Worker.
+2. Registre um OAuth App no GitHub com callback `<worker>/callback`.
+3. Grave `GITHUB_CLIENT_ID` e `GITHUB_CLIENT_SECRET` nas variáveis do Worker,
+   e `ALLOWED_DOMAINS` com o domínio do site.
+4. Acrescente `base_url: <worker>` ao bloco `backend` do
+   `public/admin/config.yml` — a linha já está lá, comentada.
 
-Publicar continua sendo o mesmo caminho: commit → CI → deploy.
+**Passo a passo com telas e valores exatos em `MANUAL.md`, seção 8.**
+
+O Worker pede escopo `repo,user`, que cobre repositório privado — nada muda no
+editor se o repositório deixar de ser público.
+
+Publicar continua sendo o mesmo caminho: commit → CI → deploy. No editor
+remoto o Save já é o commit, então não há `npm run validate` antes: erro de
+conteúdo aparece como deploy vermelho, e não na tela de quem escreveu.
 
 ---
 
