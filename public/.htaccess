@@ -151,6 +151,7 @@ ErrorDocument 404 /404.html
   AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml
   AddOutputFilterByType DEFLATE application/javascript application/json
   AddOutputFilterByType DEFLATE application/xml application/rss+xml
+  AddOutputFilterByType DEFLATE application/xslt+xml
   AddOutputFilterByType DEFLATE image/svg+xml font/woff2
 </IfModule>
 
@@ -161,7 +162,11 @@ ErrorDocument 404 /404.html
   AddType image/webp .webp
   AddType application/manifest+json .webmanifest
   AddType application/wasm .wasm
-  AddCharset UTF-8 .html .css .js .xml .json .txt
+  # A folha de apresentacao do RSS. Servida como texto, o navegador ignora a
+  # transformacao e volta a mostrar a arvore XML crua — que é exatamente o que
+  # ela existe para evitar. Declarar aqui nao depende do mime.types do servidor.
+  AddType application/xslt+xml .xsl
+  AddCharset UTF-8 .html .css .js .xml .json .txt .xsl
 </IfModule>
 
 # ── Arquivos que nunca devem ser servidos ────────────────────────────────────
