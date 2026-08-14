@@ -1,7 +1,7 @@
 name: Diagnostico FTP
 
 # Mapeia o servidor por leitura, sem escrever nada, para descobrir qual pasta
-# o dominio realmente serve. Existe porque o alternativa era chutar o caminho
+# o dominio realmente serve. Existe porque a alternativa era chutar o caminho
 # no FTP_SERVER_DIR: cada chute errado deixa uma copia inteira do site numa
 # pasta orfa, ocupando espaco e inode, e sem dizer onde estava o certo.
 #
@@ -9,6 +9,11 @@ name: Diagnostico FTP
 # deploy, e so gasta conexao quando alguem esta investigando.
 on:
   workflow_dispatch:
+    inputs:
+      caminho:
+        description: 'Pasta a listar, relativa ao login FTP (vazio = mapa geral)'
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -29,11 +34,17 @@ jobs:
       # A senha vai num arquivo temporario do runner em vez da linha de
       # comando, que ficaria visivel em `ps`. O runner é efemero e o Actions
       # mascara secrets na saida, mas nenhum dos dois é motivo para expor.
-      - name: Listar a arvore e achar a raiz do site
+      #
+      # Caminhos que contenham o nome de usuario saem mascarados como *** no
+      # log — o Actions nao sabe distinguir caminho de segredo. Por isso o que
+      # interessa aqui sao os NOMES das pastas listadas, que reconstroem o
+      # caminho sem depender do pwd sair legivel.
+      - name: Listar o servidor
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          CAMINHO: ${{ inputs.caminho }}
         run: |
           set -euo pipefail
           roteiro="$(mktemp)"
@@ -47,31 +58,21 @@ jobs:
             echo 'set net:timeout 30'
             echo 'set net:max-retries 2'
             echo "open -u \"$FTP_USERNAME\",\"$FTP_PASSWORD\" \"$FTP_SERVER\""
-            # A pasta onde a conta cai ja foi mapeada e contem uma copia do
-            # site que o dominio nao serve. O que falta é subir na hierarquia:
-            # se a conta nao estiver presa (chroot), a pasta real do dominio
-            # aparece em domains/<dominio>/public_html/.
-            #
-            # Caminhos que contenham o nome de usuario saem mascarados como
-            # *** no log — o Actions nao sabe distinguir caminho de segredo.
-            # Por isso o que interessa aqui sao os NOMES das pastas listadas,
-            # que reconstroem o caminho sem depender do pwd sair legivel.
-            echo 'echo ===PWD-DO-LOGIN==='
-            echo 'pwd'
-            echo 'echo ===PASTA-PAI==='
-            echo 'cd ..'
-            echo 'pwd'
-            echo 'cls -l --sort=name'
-            echo 'echo ===DOIS-NIVEIS-ACIMA==='
-            echo 'cd ..'
-            echo 'pwd'
-            echo 'cls -l --sort=name'
-            echo 'echo ===RAIZ-ABSOLUTA==='
-            echo 'cd /'
-            echo 'pwd'
-            echo 'cls -l --sort=name'
-            echo 'echo ===ARVORE-A-PARTIR-DA-RAIZ==='
-            echo 'find -d 3'
+
+            if [ -n "$CAMINHO" ]; then
+              echo "echo ===CONTEUDO DE $CAMINHO==="
+              echo "cls -l --sort=name \"$CAMINHO\""
+              echo "echo ===ARVORE DE $CAMINHO==="
+              echo "find -d 2 \"$CAMINHO\""
+            else
+              echo 'echo ===PWD-DO-LOGIN==='
+              echo 'pwd'
+              echo 'echo ===HOME-DA-CONTA==='
+              echo 'cd ..'
+              echo 'cls -l --sort=name'
+              echo 'echo ===ARVORE==='
+              echo 'find -d 3'
+            fi
             echo 'bye'
           } > "$roteiro"
 
@@ -84,9 +85,13 @@ jobs:
           echo "  Candidatos a raiz do site"
           echo "================================================================"
           echo ""
-          grep -inE 'domains|public_html|index\.html|default\.php' "$saida" | head -80 || true
+          # O index.html que o dominio serve hoje é o mockup de 584 KB
+          # (598527 bytes, conferido pelo Etag da resposta HTTP). Achar um
+          # arquivo desse tamanho identifica a pasta certa sem ambiguidade —
+          # é mais confiavel que deduzir o caminho pelo nome.
+          grep -inE '598527|default\.php|index\.html|public_html' "$saida" | head -80 || true
 
           echo ""
-          echo "A pasta certa é a que contem o index.html de ~598527 bytes (o"
-          echo "mockup que o dominio serve hoje) ou o default.php da Hostinger."
-          echo "Esse caminho vira a Variable FTP_SERVER_DIR, com barra no final."
+          echo "A pasta certa é a que contem o index.html de ~598527 bytes ou o"
+          echo "default.php da Hostinger. Esse caminho vira a Variable"
+          echo "FTP_SERVER_DIR, sempre com barra no final."
