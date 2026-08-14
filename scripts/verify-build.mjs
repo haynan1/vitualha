@@ -107,9 +107,33 @@ async function checkHtml(file, allFiles) {
     }
   }
 
-  // ── Acessibilidade basica ────────────────────────────────────────────────
+  // ── Imagens: alt presente e arquivo existente ────────────────────────────
+  //
+  // O `src` precisa ser conferido contra o dist, e nao so o `<a href>`. Uma
+  // imagem escrita com caminho absoluto no Markdown — `/src/assets/...` em vez
+  // do caminho relativo ao artigo — nao gera erro de build, nao aparece em
+  // teste nenhum e sai do otimizador intacta, apontando para um arquivo que
+  // nunca foi copiado. O resultado é imagem quebrada em producao com a CI
+  // verde, que é a pior combinacao possivel: nada avisa.
   for (const tag of html.matchAll(/<img\b[^>]*>/gi)) {
     if (attribute(tag[0], 'alt') === undefined) fail(label, 'imagem sem atributo alt');
+
+    const candidatos = [attribute(tag[0], 'src')];
+
+    // Cada item do srcset é "url 640w"; a URL é o primeiro campo. Uma variante
+    // ausente so aparece no tamanho de tela que a escolhe, entao passaria por
+    // qualquer conferencia feita a olho.
+    const srcset = attribute(tag[0], 'srcset');
+    if (srcset) {
+      for (const parte of srcset.split(',')) {
+        candidatos.push(parte.trim().split(/\s+/)[0]);
+      }
+    }
+
+    for (const url of candidatos) {
+      if (!url || !url.startsWith('/') || url.startsWith('//')) continue;
+      if (!allFiles.has(targetFor(url))) fail(label, `imagem quebrada: ${url}`);
+    }
   }
 
   // ── Rascunho nao pode chegar ao ar ───────────────────────────────────────
@@ -167,6 +191,10 @@ async function main() {
     ['theme.js', 'aplicacao do tema antes da primeira pintura'],
     ['admin/index.html', 'editor de conteudo'],
     ['admin/config.yml', 'configuracao do editor'],
+    ['rss.xml', 'feed de assinatura'],
+    // Sem a folha, o feed aberto no navegador volta a ser arvore XML crua
+    // precedida do aviso de "no style information" — parece defeito do site.
+    ['rss/styles.xsl', 'apresentacao do feed no navegador'],
   ];
 
   for (const [file, purpose] of required) {

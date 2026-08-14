@@ -301,8 +301,9 @@ Suba **JPG** para fotografia e **PNG** para gráfico, diagrama ou qualquer
 imagem com texto e linhas nítidas. SVG serve para ícone e logotipo.
 
 Não se preocupe com o formato final: o build converte tudo para **WebP** e
-gera de sete a nove larguras diferentes, servindo a menor que couber na tela
-de quem lê. Você sobe uma imagem; o navegador escolhe a versão certa.
+gera várias larguras — três para a capa, até nove para imagem no corpo do
+texto —, servindo a menor que couber na tela de quem lê. Você sobe uma
+imagem; o navegador escolhe a versão certa.
 
 O pipeline também aceita HEIC — o formato que o iPhone usa por padrão — mas
 converter para JPG antes de subir evita surpresa e mantém o repositório legível
