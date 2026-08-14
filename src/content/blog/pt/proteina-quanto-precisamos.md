@@ -3,8 +3,6 @@ title: 'Proteína: quanto realmente precisamos consumir?'
 summary: Descubra quanto de proteína o organismo realmente necessita, quais são as melhores fontes e como montar uma alimentação equilibrada sem exageros.
 category: nutrition
 publishedAt: 2026-08-10
-author: camila-ferreira
-reviewer: rafael-souza
 tags:
   - proteína
   - macronutrientes

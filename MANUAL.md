@@ -124,7 +124,6 @@ title: 'Ômega-3: o que a evidência mostra'
 summary: Um resumo de 40 a 320 caracteres que aparece no card, na busca e no Google.
 category: science
 publishedAt: 2026-08-14
-author: camila-ferreira
 tags:
   - ômega-3
   - suplementação
@@ -136,6 +135,10 @@ O texto começa aqui, em Markdown.
 
 O bloco entre `---` é o **frontmatter**: os dados do artigo. O texto vem
 depois.
+
+Não há campo `author` aí porque ainda não existe nenhuma ficha de autor — o
+artigo sai assinado pela publicação. Ao criar a primeira ficha, acrescente
+`author: nome-do-arquivo`.
 
 ---
 
@@ -420,11 +423,16 @@ tela. Vale conferir o Actions depois de publicar algo importante.
 
 ### Autores
 
-Uma ficha por pessoa em `src/content/authors/`:
+**Ainda não há nenhuma ficha.** Enquanto for assim, todo artigo sai assinado
+pela publicação, e a autoridade vem das fontes citadas em `references` — que é
+o que o leitor pode conferir. Isso é uma escolha válida, não uma pendência: é
+melhor do que atribuir um texto a alguém que não o revisou.
+
+Para criar a primeira, um arquivo por pessoa em `src/content/authors/`:
 
 ```markdown
 ---
-name: Camila Ferreira
+name: Nome Sobrenome
 credential: CRN-3 12345
 role:
   pt: Nutricionista clínica
@@ -436,8 +444,13 @@ links: {}
 ---
 ```
 
-O nome do arquivo (`camila-ferreira`) é o que se usa em `author:` e
-`reviewer:`.
+O nome do arquivo — `nome-sobrenome.md` — é o que se usa em `author:` e
+`reviewer:` nos artigos. O `credential` (CRN, CRM) é o que mais pesa em
+conteúdo de saúde.
+
+Enquanto a pasta estiver vazia, o build avisa
+`No files found matching "**/*.md"`. É esperado, e some quando a primeira
+ficha existir.
 
 ### Páginas fixas
 

@@ -3,8 +3,6 @@ title: 'Creatina: o que a ciência realmente diz?'
 summary: Um dos suplementos mais estudados do mundo, com evidência sólida para força e desempenho — e uma lista de mitos que já deveria ter sido aposentada.
 category: fitness
 publishedAt: 2026-08-06
-author: rafael-souza
-reviewer: camila-ferreira
 tags:
   - creatina
   - suplementação

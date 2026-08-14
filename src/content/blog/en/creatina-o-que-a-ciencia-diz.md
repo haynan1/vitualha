@@ -4,8 +4,6 @@ summary: One of the most studied supplements in the world, with solid evidence f
 permalink: creatine-what-science-says
 category: fitness
 publishedAt: 2026-08-06
-author: rafael-souza
-reviewer: camila-ferreira
 tags:
   - creatine
   - supplementation

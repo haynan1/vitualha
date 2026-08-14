@@ -3,7 +3,6 @@ title: 'Fibras: por que elas são tão importantes?'
 summary: Fibras solúveis e insolúveis atuam de formas diferentes na saciedade, no intestino e no controle da glicemia — e a maioria das pessoas consome menos da metade do recomendado.
 category: nutrition
 publishedAt: 2026-08-02
-author: camila-ferreira
 tags:
   - fibras
   - intestino

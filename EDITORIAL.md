@@ -24,7 +24,7 @@ conteúdo — decisões técnicas estão em [ARCHITECTURE.md](ARCHITECTURE.md).
 | `summary`            | sim         | 40 a 320 caracteres. Aparece no card, na busca e na descrição do Google. Escreva como frase completa.                 |
 | `category`           | sim         | `nutrition`, `foods`, `health`, `fitness`, `recipes` ou `science`.                                                    |
 | `publishedAt`        | sim         | `AAAA-MM-DD`.                                                                                                         |
-| `author`             | não         | Nome do arquivo em `src/content/authors/` (ex.: `camila-ferreira`). Em branco, o artigo sai assinado pela publicação. |
+| `author`             | não         | Nome do arquivo em `src/content/authors/`. Ainda não há fichas: em branco, o artigo sai assinado pela publicação.     |
 | `reviewer`           | não         | Quem fez a revisão técnica. **Use sempre** em conteúdo clínico, de suplementação ou com número recomendado.           |
 | `updatedAt`          | não         | Data da última revisão relevante. Aparece no artigo e no JSON-LD.                                                     |
 | `cover` / `coverAlt` | não         | Havendo capa, o texto alternativo passa a ser obrigatório — o build cobra. Sem capa, entra um gradiente da categoria. |

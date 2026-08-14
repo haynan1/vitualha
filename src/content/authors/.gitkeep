@@ -1,0 +1,11 @@
+Mantem a pasta no Git enquanto nao ha nenhuma ficha de autor.
+
+Sem este arquivo o diretorio some do repositorio, e um checkout limpo perde a
+estrutura da colecao — quem clonar nao ve onde as fichas moram.
+
+O build continua avisando "No files found matching **/*.md": é verdade, e o
+aviso desaparece sozinho quando a primeira ficha existir. Nao ha como calar
+esse aviso sem remover a colecao inteira, o que custaria mais do que vale.
+
+Uma ficha por pessoa que assina, em arquivo .md — ver MANUAL.md, secao 9.
+Apague este arquivo quando criar a primeira.

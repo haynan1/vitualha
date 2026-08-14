@@ -4,8 +4,6 @@ summary: Find out how much protein the body actually requires, which sources are
 permalink: protein-how-much-do-we-need
 category: nutrition
 publishedAt: 2026-08-10
-author: camila-ferreira
-reviewer: rafael-souza
 tags:
   - protein
   - macronutrients
