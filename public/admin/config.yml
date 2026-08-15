@@ -61,7 +61,15 @@ collections:
     folder: src/content/blog
     create: true
     slug: '{{slug}}'
-    preview_path: 'artigos/{{fields.permalink}}'
+    # `{{slug}}` e nao `{{fields.permalink}}`: com o endereco em branco — que é
+    # o caso normal — o caminho virava `artigos/`, e o botao de ver no site
+    # levava ao indice em vez do artigo.
+    #
+    # Limitacao conhecida: o Sveltia aceita um caminho so, entao artigo em
+    # ingles com endereco proprio abre a versao em portugues. Um artigo
+    # existente e correspondente é melhor destino que um 404, e nao ha sintaxe
+    # condicional aqui para fazer melhor.
+    preview_path: 'artigos/{{slug}}'
     media_folder: '../../../assets/uploads'
     public_folder: '../../../assets/uploads'
     i18n: true
@@ -80,13 +88,18 @@ collections:
           i18n: true,
           hint: 'Aparece no card, na busca e no Google. Entre 40 e 320 caracteres.',
         }
+      # O `?` no fim do grupo é o que torna o campo realmente opcional. O
+      # `pattern` do CMS roda mesmo em campo vazio: sem aceitar string vazia,
+      # `required: false` nao vale nada — o editor marca erro em branco e
+      # obriga a inventar um endereco, que é exatamente o oposto do que a dica
+      # promete. O Zod continua exigindo o formato completo quando ha valor.
       - {
           name: permalink,
           label: Endereço (URL),
           widget: string,
           required: false,
           i18n: true,
-          pattern: ['^[a-z0-9]+(?:-[a-z0-9]+)*$', 'Só minúsculas sem acento, números e hífen'],
+          pattern: ['^([a-z0-9]+(?:-[a-z0-9]+)*)?$', 'Só minúsculas sem acento, números e hífen'],
           hint: 'Opcional. Em branco, usa o nome do arquivo. Use para dar uma URL própria em inglês.',
         }
       - {

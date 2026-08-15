@@ -16,6 +16,22 @@ const urlSlug = z
     'Use apenas letras minusculas sem acento, numeros e hifens (ex: proteina-quanto-precisamos)',
   );
 
+/**
+ * Campo de slug que pode ficar em branco, e branco significa ausente.
+ *
+ * Sem o preprocess, `permalink: ''` reprova com "use apenas letras
+ * minusculas..." — mensagem que descreve o formato quando o problema é o
+ * vazio, e que contradiz a propria dica do campo ("em branco, usa o nome do
+ * arquivo"). O CMS normalmente omite campo opcional vazio, mas isso depende de
+ * uma opcao de configuracao dele; um arquivo editado a mao nao passa por ela.
+ *
+ * Espaco em branco tambem vira ausente: `permalink: '   '` nunca é intencao.
+ */
+const urlSlugOpcional = z.preprocess(
+  (valor) => (typeof valor === 'string' && valor.trim() === '' ? undefined : valor),
+  urlSlug.optional(),
+);
+
 const reference_ = z.object({
   title: z.string().min(3),
   url: z.url().startsWith('https://', 'Fontes devem usar https'),
@@ -67,7 +83,7 @@ const blog = defineCollection({
          * loader do Astro e substituiria o id da entrada, apagando o prefixo
          * de idioma que liga as duas traducoes.
          */
-        permalink: urlSlug.optional(),
+        permalink: urlSlugOpcional,
         references: z.array(reference_).default([]),
         faq: z.array(faqItem).max(10).default([]),
         /** Remove a pagina do sitemap e pede noindex aos buscadores. */
