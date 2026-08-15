@@ -338,6 +338,34 @@ imagens](#conversor-de-imagens).
 PNG de fotografia é o caso que mais compensa: são os arquivos de vários
 megabytes que incham o repositório sem melhorar nada na tela.
 
+#### Como usar o conversor
+
+Ele é uma **página do site**, não um comando nem um botão do editor. Com o
+`npm run dev` rodando, abra `localhost:4321/ferramentas/conversor-de-imagens/`
+(publicado: `vitualha.com/ferramentas/conversor-de-imagens/`).
+
+1. **Selecionar imagens** — escolhe o PNG. Arrastar também funciona.
+2. Confira o que entrou na lista: dimensões, formato e peso atual.
+3. Em **Converter para**, escolha **JPG / JPEG** para fotografia. O padrão é
+   WebP, que serve para o resto.
+4. Em **Qualidade**, clique em **Alta qualidade** (95) ou arraste para 90.
+5. Em **Configurações avançadas**, se a imagem passar de 1600 px, clique na
+   pastilha **1600 px**. Ela nunca amplia.
+6. **Converter imagens**.
+7. Confira **Redução**. Em dúvida, **Comparar antes e depois** abre uma
+   alavanca para arrastar entre o original e o convertido.
+8. **Baixar imagem** — vai para a pasta Downloads com o mesmo nome, só com a
+   extensão trocada.
+
+Vários arquivos de uma vez funcionam igual, e aí aparece **Baixar tudo**, que
+empacota num ZIP.
+
+**Ele entrega o arquivo e para por aí.** Não mexe no projeto — é uma página
+web. Mover o arquivo para `src/assets/uploads/` e apontar a capa para ele nos
+dois idiomas continua sendo manual.
+
+Nada é enviado para servidor nenhum: a conversão roda no seu navegador.
+
 ### Que tamanho subir
 
 **Largura de 1600 px, qualidade 85–90.** Esse é o número que importa.

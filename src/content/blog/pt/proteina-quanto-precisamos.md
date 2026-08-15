@@ -3,11 +3,15 @@ title: 'Proteína: quanto realmente precisamos consumir?'
 summary: Descubra quanto de proteína o organismo realmente necessita, quais são as melhores fontes e como montar uma alimentação equilibrada sem exageros.
 category: nutrition
 publishedAt: 2026-08-10
+cover: /src/assets/uploads/imagem4.webp
+coverAlt: Variedade de alimentos ricos em proteína, como carnes, ovos, peixes, laticínios, leguminosas, tofu e oleaginosas.
 tags:
   - proteína
   - macronutrientes
   - massa muscular
 featured: true
+draft: false
+noindex: false
 references:
   - title: Protein and Amino Acids — Dietary Reference Intakes
     url: https://www.ncbi.nlm.nih.gov/books/NBK56068/
