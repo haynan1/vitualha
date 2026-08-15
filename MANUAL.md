@@ -52,7 +52,7 @@ src/content/
 ├── pages/
 │   ├── pt/    about, contact, editorial, privacy, terms
 │   └── en/
-└── authors/   uma ficha por pessoa que assina
+└── authors/   uma ficha por pessoa que assina — hoje vazia
 ```
 
 Português e inglês são **arquivos irmãos com o mesmo nome**. É o nome do
@@ -162,7 +162,7 @@ melhor quebrar na publicação do que publicar dado inválido.
 | `tags`        | não         | até 8                                                      |
 | `featured`    | não         | `true` destaca na home                                     |
 | `draft`       | não         | `true` esconde do site publicado                           |
-| `permalink`   | não         | muda o endereço; padrão é o nome do arquivo                |
+| `permalink`   | não         | endereço próprio; em branco usa o nome do arquivo          |
 | `references`  | não         | fontes: `title`, `url` (https), `publisher`                |
 | `faq`         | não         | até 10 pares pergunta/resposta                             |
 | `noindex`     | não         | tira do sitemap e pede para não indexar                    |
@@ -186,7 +186,9 @@ lê. URL precisa ser `https`.
 resultado expandido na busca.
 
 **`permalink`** só quando quiser um endereço diferente do nome do arquivo —
-típico ao traduzir, para o inglês ter URL em inglês.
+típico ao traduzir, para o inglês ter URL em inglês. **Deixar em branco é o
+normal:** o endereço sai do nome do arquivo, e nenhum dos artigos em português
+usa esse campo.
 
 ### Categorias
 
@@ -203,6 +205,18 @@ típico ao traduzir, para o inglês ter URL em inglês.
 
 Nome de arquivo e `permalink` aceitam só **minúsculas sem acento, números e
 hífen**: `proteina-quanto-precisamos`. O `npm run new` já converte o título.
+
+O campo **Endereço (URL)** no editor pode ficar vazio — e é o que você vai
+fazer quase sempre. Vazio significa "use o nome do arquivo".
+
+> Se você viu esse campo marcar erro em vermelho estando em branco, era um
+> defeito, corrigido em 14/08/2026. A regra de formato estava sendo aplicada
+> também ao campo vazio, o que tornava obrigatório um campo anunciado como
+> opcional. Recarregue o editor com **Ctrl+Shift+R** se ainda aparecer.
+
+Preencher continua valendo quando você quer um endereço próprio, e aí o
+formato é cobrado: `Proteína Inválida` reprova, `protein-how-much-do-we-need`
+passa.
 
 ---
 
@@ -390,11 +404,18 @@ src/content/blog/en/creatina-o-que-a-ciencia-diz.md
 ```
 
 O nome do arquivo é o vínculo. Para o endereço em inglês ficar em inglês, use
-o `permalink` no arquivo `en/`:
+o `permalink` **só no arquivo `en/`**:
 
 ```yaml
 permalink: creatine-what-science-says
 ```
+
+O lado em português fica sem o campo — é o único caso em que preenchê-lo vale
+a pena, e mesmo assim de um lado só.
+
+Um detalhe do editor: com endereço próprio em inglês, o botão de ver no site
+abre a versão em português. O Sveltia aceita um caminho de preview apenas, e
+um artigo correspondente é melhor destino que um 404.
 
 O editor visual mostra os dois idiomas na mesma tela.
 
@@ -598,7 +619,8 @@ A mensagem diz o que corrigir. Os casos comuns:
 | `String must contain at least 40 character(s)`       | resumo curto demais                                |
 | `Invalid enum value`                                 | categoria fora da lista                            |
 | `Toda capa precisa de coverAlt`                      | imagem de capa sem descrição                       |
-| `Use apenas letras minusculas sem acento`            | acento ou espaço no endereço                       |
+| `Use apenas letras minusculas sem acento`            | acento ou espaço no endereço preenchido            |
+| `imagem quebrada: /src/assets/…`                     | caminho de imagem absoluto — use o relativo        |
 | `robots.txt nao responde com o conteudo deste build` | envio foi para a pasta errada — ver `RELATORIO.md` |
 
 **O site no ar não cai quando o deploy falha.** Só não recebe a novidade.
