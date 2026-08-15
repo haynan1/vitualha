@@ -104,7 +104,20 @@ ErrorDocument 404 /404.html
   #
   # Ao ativar newsletter externa, acrescente o host do provedor em form-action.
   # Ao ativar analytics, acrescente o host em script-src e connect-src.
-  Header always set Content-Security-Policy "default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com https://www.google.com.br; font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'wasm-unsafe-eval' https://pagead2.googlesyndication.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://www.googletagservices.com https://adservice.google.com https://adservice.google.com.br https://fundingchoicesmessages.google.com; connect-src 'self' https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://fundingchoicesmessages.google.com; frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com; manifest-src 'self'; upgrade-insecure-requests"
+  #
+  # ── Conversor de imagens (/ferramentas/, /en/tools/) ─────────────────────
+  # `blob:` em img-src: a ferramenta mostra miniatura do arquivo que o usuario
+  # escolheu, e a URL de um File local é sempre blob:. Sem esta entrada a
+  # pre-visualizacao aparece quebrada — e so em producao, porque o dev nao
+  # aplica a politica. A alternativa seria base64, que carrega a mesma imagem
+  # duas vezes na memoria.
+  #
+  # `worker-src 'self' blob:`: o encoder AVIF roda em Web Worker para nao
+  # travar a aba. Vem de 'self' no build; blob: cobre o modo de dev do Vite.
+  #
+  # Nao é preciso liberar nada em connect-src: o .wasm é servido pelo proprio
+  # dominio, e nenhuma imagem sai do dispositivo.
+  Header always set Content-Security-Policy "default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: blob: https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com https://www.google.com.br; font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'wasm-unsafe-eval' https://pagead2.googlesyndication.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://www.googletagservices.com https://adservice.google.com https://adservice.google.com.br https://fundingchoicesmessages.google.com; worker-src 'self' blob:; connect-src 'self' https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://fundingchoicesmessages.google.com; frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com; manifest-src 'self'; upgrade-insecure-requests"
 </IfModule>
 
 # ── Cache ────────────────────────────────────────────────────────────────────

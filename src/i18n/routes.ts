@@ -15,6 +15,8 @@ export const ROUTE_SEGMENTS = {
     privacy: 'privacidade',
     terms: 'termos',
     editorial: 'politica-editorial',
+    tools: 'ferramentas',
+    imageConverter: 'conversor-de-imagens',
   },
   en: {
     articles: 'articles',
@@ -25,6 +27,8 @@ export const ROUTE_SEGMENTS = {
     privacy: 'privacy',
     terms: 'terms',
     editorial: 'editorial-policy',
+    tools: 'tools',
+    imageConverter: 'image-converter',
   },
 } as const satisfies Record<Locale, Record<string, string>>;
 
@@ -68,3 +72,12 @@ export const articleUrl = (locale: Locale, slug: string): string => route(locale
 export const categoryUrl = (locale: Locale, slug: string): string =>
   route(locale, 'category', slug);
 export const searchUrl = (locale: Locale): string => route(locale, 'search');
+
+/**
+ * Ferramentas ficam sob um segmento proprio (`/ferramentas/`, `/en/tools/`)
+ * em vez de na raiz: separa utilitario de conteudo editorial na URL, no
+ * breadcrumb e nos relatorios de busca, e abre espaco para a proxima sem
+ * reorganizar nada.
+ */
+export const imageConverterUrl = (locale: Locale): string =>
+  path(locale, ROUTE_SEGMENTS[locale].tools, ROUTE_SEGMENTS[locale].imageConverter);

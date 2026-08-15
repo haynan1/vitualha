@@ -3,11 +3,15 @@ title: 'Creatina: o que a ciência realmente diz?'
 summary: Um dos suplementos mais estudados do mundo, com evidência sólida para força e desempenho — e uma lista de mitos que já deveria ter sido aposentada.
 category: fitness
 publishedAt: 2026-08-06
+cover: /src/assets/uploads/imagem.png
+coverAlt: Pote aberto de creatina em pó com dosador cheio, copo de água, coqueteleira, halter e caderno sobre uma bancada de concreto
 tags:
   - creatina
   - suplementação
   - desempenho
 featured: true
+draft: false
+noindex: false
 references:
   - title: International Society of Sports Nutrition position stand — creatine supplementation
     url: https://pubmed.ncbi.nlm.nih.gov/28615996/

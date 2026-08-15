@@ -110,6 +110,49 @@ export function articleSchema(input: ArticleSchemaInput) {
   };
 }
 
+type WebAppSchemaInput = {
+  name: string;
+  description: string;
+  url: string;
+  locale: Locale;
+  /** Recursos reais da ferramenta, na lingua da pagina. */
+  featureList: readonly string[];
+  site: URL | undefined;
+};
+
+/**
+ * Ferramenta gratuita hospedada no site.
+ *
+ * Só entram propriedades que se pode conferir abrindo a pagina. Sem
+ * `aggregateRating`, sem `interactionCount`, sem "usado por N pessoas": nada
+ * disso existe aqui, e schema inventado é motivo de acao manual do Google
+ * contra o dominio inteiro — arriscar o site por uma estrela desenhada no
+ * resultado de busca seria um pessimo negocio.
+ *
+ * `price: '0'` nao é enfeite: a ferramenta é gratuita de verdade, sem cadastro,
+ * sem limite de uso e sem marca d'agua.
+ */
+export function webApplicationSchema(input: WebAppSchemaInput) {
+  const { site } = input;
+
+  return {
+    '@type': 'WebApplication',
+    '@id': `${absolute(input.url, site)}#app`,
+    name: input.name,
+    description: input.description,
+    url: absolute(input.url, site),
+    inLanguage: LOCALE_TAG[input.locale],
+    applicationCategory: 'MultimediaApplication',
+    // Roda em qualquer sistema com navegador — nao ha binario para instalar.
+    operatingSystem: 'Any',
+    browserRequirements: 'Requires JavaScript.',
+    featureList: [...input.featureList],
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'BRL' },
+    publisher: { '@id': absolute('/#organization', site) },
+    isPartOf: { '@id': absolute('/#website', site) },
+  };
+}
+
 export function breadcrumbSchema(
   trail: Array<{ name: string; url: string }>,
   site: URL | undefined,

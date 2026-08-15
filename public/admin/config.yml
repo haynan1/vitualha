@@ -43,7 +43,18 @@ publish_mode: simple
 output:
   omit_empty_optional_fields: true
 
-media_folder: src/assets/uploads
+# Onde as imagens enviadas pelo editor sao gravadas. `src/assets/uploads` e nao
+# `public/`: so o que passa por `src/` entra no pipeline do astro:assets e sai
+# como WebP responsivo.
+#
+# A barra inicial e obrigatoria na doc do Sveltia para caminho de colecao —
+# "must start with a slash to indicate an absolute path from the root of the
+# repository". Sem ela o caminho e resolvido contra a pasta da colecao e a
+# imagem vai parar em `src/content/assets/uploads/`, que nenhum artigo alcanca.
+#
+# O frontmatter recebe esse mesmo caminho absoluto, e `src/content.config.ts`
+# (helper `upload`) converte para o relativo que o `image()` do Astro exige.
+media_folder: /src/assets/uploads
 public_folder: /src/assets/uploads
 
 i18n:
@@ -70,8 +81,8 @@ collections:
     # existente e correspondente é melhor destino que um 404, e nao ha sintaxe
     # condicional aqui para fazer melhor.
     preview_path: 'artigos/{{slug}}'
-    media_folder: '../../../assets/uploads'
-    public_folder: '../../../assets/uploads'
+    # Sem media_folder proprio: vale o do topo, que ja aponta para
+    # /src/assets/uploads. Override relativo aqui era o que desviava o upload.
     i18n: true
     format: yaml-frontmatter
     summary: '{{title}}'
@@ -200,6 +211,13 @@ collections:
           default: false,
           i18n: duplicate,
         }
+      # Em lista com subcampos, `i18n: true` no campo NAO basta: o Sveltia so
+      # habilita o botao de adicionar no painel do idioma nao padrao se ALGUM
+      # subcampo declarar `i18n: true` — o padrao de subcampo é `false`
+      # (list-editor-complex.svelte: `isAddDisabled = isDuplicateField ||
+      # !hasEditableSubFields`). Sem isso o editor em ingles so consegue
+      # reordenar o que ja existe, nunca acrescentar. Por isso cada subcampo
+      # abaixo repete o `i18n: true`.
       - name: references
         label: Fontes científicas
         widget: list
@@ -207,14 +225,15 @@ collections:
         i18n: true
         summary: '{{fields.title}}'
         fields:
-          - { name: title, label: Título, widget: string }
+          - { name: title, label: Título, widget: string, i18n: true }
           - {
               name: url,
               label: Link,
               widget: string,
+              i18n: true,
               pattern: ['^https://', 'A fonte precisa usar https'],
             }
-          - { name: publisher, label: Publicado por, widget: string, required: false }
+          - { name: publisher, label: Publicado por, widget: string, required: false, i18n: true }
       - name: faq
         label: Perguntas frequentes
         widget: list
@@ -223,8 +242,8 @@ collections:
         max: 10
         summary: '{{fields.question}}'
         fields:
-          - { name: question, label: Pergunta, widget: string }
-          - { name: answer, label: Resposta, widget: text }
+          - { name: question, label: Pergunta, widget: string, i18n: true }
+          - { name: answer, label: Resposta, widget: text, i18n: true }
       - {
           name: body,
           label: Conteúdo,
@@ -240,8 +259,6 @@ collections:
     folder: src/content/pages
     create: false
     delete: false
-    media_folder: '../../../assets/uploads'
-    public_folder: '../../../assets/uploads'
     i18n: true
     format: yaml-frontmatter
     fields:
@@ -275,8 +292,6 @@ collections:
     folder: src/content/authors
     create: true
     slug: '{{slug}}'
-    media_folder: '../../assets/uploads'
-    public_folder: '../../assets/uploads'
     format: yaml-frontmatter
     summary: '{{name}}'
     fields:

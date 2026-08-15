@@ -1,0 +1,958 @@
+---
+import type { Locale } from '@/i18n/locales';
+import { t } from '@/i18n/ui';
+import {
+  FORMAT_LABEL,
+  MAX_BYTES,
+  MAX_FILES,
+  OUTPUT_FORMATS,
+  DEFAULT_FORMAT,
+  DEFAULT_MATTE,
+  DEFAULT_QUALITY,
+  QUALITY_PRESET_KEYS,
+} from '@/lib/converter/formats';
+import { formatBytes } from '@/lib/converter/stats';
+import { ACCEPTED_TYPES } from '@/lib/converter/validate';
+import { jsonLd } from '@/lib/seo';
+
+type Props = { locale: Locale };
+
+const { locale } = Astro.props;
+const ui = t(locale);
+const cv = ui.converter;
+
+/** Presets de maior lado. `undefined` é o "Original", que nao redimensiona. */
+const EDGES = [undefined, 1920, 1600, 1200, 1080, 800] as const;
+
+const PRESET_LABEL = {
+  smaller: cv.presetSmaller,
+  balanced: cv.presetBalanced,
+  high: cv.presetHigh,
+  maximum: cv.presetMaximum,
+} as const;
+
+const maxSize = formatBytes(MAX_BYTES, locale);
+---
+
+<div class="cv" data-converter data-locale={locale}>
+  {
+    /*
+      Dicionario para o script da ferramenta. `application/json` nao executa,
+      entao passa pela CSP sem 'unsafe-inline' e pela verificacao de script
+      inline do build. É o que evita manter as mesmas frases duas vezes, uma
+      em ui.ts e outra dentro do JavaScript.
+    */
+  }
+  <script type="application/json" data-cv-i18n set:html={jsonLd(cv)} is:inline />
+
+  {/* ── Envio ─────────────────────────────────────────────────────────── */}
+  <div class="cv__drop" data-cv-drop>
+    <label class="visually-hidden" for="cv-file">{cv.dropAria}</label>
+    <input
+      class="visually-hidden"
+      id="cv-file"
+      type="file"
+      accept={ACCEPTED_TYPES}
+      multiple
+      data-cv-input
+    />
+
+    <svg class="cv__drop-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"></path>
+      <path
+        d="M4 16v2.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V16"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"></path>
+    </svg>
+
+    <p class="cv__drop-title">{cv.dropTitle}</p>
+    <p class="cv__drop-sub">{cv.dropSubtitle}</p>
+
+    <button class="btn btn--primary cv__drop-btn" type="button" data-cv-pick>{cv.dropButton}</button
+    >
+
+    <p class="cv__drop-hint">
+      {cv.dropHint.replace('{size}', maxSize).replace('{count}', String(MAX_FILES))}
+    </p>
+  </div>
+
+  <p class="cv__privacy">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M12 3.5 5 6.2v5c0 4 2.9 7.6 7 8.8 4.1-1.2 7-4.8 7-8.8v-5L12 3.5Z"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linejoin="round"></path>
+      <path
+        d="m9.2 11.8 2 2 3.6-3.6"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"></path>
+    </svg>
+    <span>{cv.privacyNotice}</span>
+  </p>
+
+  <noscript>
+    <p class="cv__alert" data-tone="error">{cv.errorNoScript}</p>
+  </noscript>
+
+  <p class="cv__alert" role="alert" aria-live="assertive" data-cv-alert hidden></p>
+
+  {/* ── Fila ──────────────────────────────────────────────────────────── */}
+  <section class="cv__queue" aria-labelledby="cv-queue-title" data-cv-queue hidden>
+    <h2 class="cv__section-title" id="cv-queue-title">{cv.queueTitle}</h2>
+    <ul class="cv__list" data-cv-list></ul>
+  </section>
+
+  {/* ── Controles ─────────────────────────────────────────────────────── */}
+  <section class="cv__controls" aria-label={cv.formatLegend} data-cv-controls hidden>
+    <fieldset class="cv__field">
+      <legend class="cv__legend">{cv.formatLegend}</legend>
+      <div class="cv__formats">
+        {
+          OUTPUT_FORMATS.map((format) => (
+            <label class="cv__format">
+              <input
+                type="radio"
+                name="cv-format"
+                value={format}
+                checked={format === DEFAULT_FORMAT}
+                data-cv-format
+              />
+              <span>{FORMAT_LABEL[format]}</span>
+            </label>
+          ))
+        }
+      </div>
+    </fieldset>
+
+    <div class="cv__field">
+      <label class="cv__legend" for="cv-quality" data-cv-quality-label>
+        {cv.qualityValue.replace('{value}', String(DEFAULT_QUALITY))}
+      </label>
+      <input
+        class="cv__range"
+        id="cv-quality"
+        type="range"
+        min="0"
+        max="100"
+        step="1"
+        value={DEFAULT_QUALITY}
+        data-cv-quality
+      />
+      <div class="cv__presets">
+        {
+          QUALITY_PRESET_KEYS.map((preset) => (
+            <button class="cv__chip" type="button" aria-pressed="false" data-cv-preset={preset}>
+              {PRESET_LABEL[preset]}
+            </button>
+          ))
+        }
+      </div>
+    </div>
+
+    {/* Só aparece quando o destino perde transparencia e ha o que perder. */}
+    <div class="cv__alpha" data-cv-alpha hidden>
+      <p class="cv__alpha-title">{cv.alphaTitle}</p>
+      <p class="cv__alpha-text">{cv.alphaText}</p>
+      <div class="cv__alpha-row">
+        <label class="cv__matte">
+          <span>{cv.alphaPick}</span>
+          <input type="color" value={DEFAULT_MATTE} data-cv-matte />
+        </label>
+      </div>
+    </div>
+
+    <details class="cv__advanced">
+      <summary class="cv__summary">{cv.advanced}</summary>
+
+      <div class="cv__advanced-body">
+        <p class="cv__legend">{cv.sizeLegend}</p>
+
+        <div class="cv__presets">
+          {
+            EDGES.map((edge) => (
+              <button
+                class="cv__chip"
+                type="button"
+                aria-pressed={edge === undefined ? 'true' : 'false'}
+                data-cv-edge={edge === undefined ? '' : String(edge)}
+              >
+                {edge === undefined ? cv.sizePresetOriginal : `${edge} px`}
+              </button>
+            ))
+          }
+        </div>
+        <p class="cv__hint">{cv.sizePresetHint}</p>
+
+        <label class="cv__check">
+          <input type="checkbox" data-cv-resize-toggle />
+          <span>{cv.sizeResize}</span>
+        </label>
+
+        <div class="cv__dims" data-cv-resize-fields hidden>
+          <label class="cv__dim">
+            <span>{cv.width}</span>
+            <input type="number" min="1" inputmode="numeric" data-cv-width />
+          </label>
+          <label class="cv__dim">
+            <span>{cv.height}</span>
+            <input type="number" min="1" inputmode="numeric" data-cv-height />
+          </label>
+          <label class="cv__check">
+            <input type="checkbox" checked data-cv-ratio />
+            <span>{cv.keepRatio}</span>
+          </label>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  {/* ── Acao ──────────────────────────────────────────────────────────── */}
+  <div class="cv__action" data-cv-action hidden>
+    <button class="btn btn--primary cv__go" type="button" data-cv-convert>{cv.convert}</button>
+
+    <div class="cv__progress" data-cv-progress hidden>
+      <p class="cv__progress-text" role="status" aria-live="polite" data-cv-progress-text></p>
+      <div class="cv__track"><span class="cv__bar" data-cv-bar></span></div>
+    </div>
+  </div>
+
+  {/* ── Resultado ─────────────────────────────────────────────────────── */}
+  <section class="cv__results" aria-labelledby="cv-results-title" data-cv-results hidden>
+    <h2 class="cv__section-title" id="cv-results-title">{cv.resultsTitle}</h2>
+    <div class="cv__totals" data-cv-totals></div>
+    <div class="cv__result-actions">
+      <button class="btn btn--primary" type="button" data-cv-download-all hidden>
+        {cv.downloadAll}
+      </button>
+      <button class="btn btn--ghost" type="button" data-cv-restart>{cv.restart}</button>
+    </div>
+  </section>
+
+  {/* Molde de cada linha da fila, preenchido pelo script. */}
+  <template data-cv-item>
+    <li class="cv__item">
+      <img class="cv__thumb" alt="" loading="lazy" decoding="async" data-thumb />
+
+      <div class="cv__meta">
+        <p class="cv__name" data-name></p>
+        <p class="cv__specs" data-specs></p>
+        <span class="cv__badge" data-alpha hidden></span>
+      </div>
+
+      <div class="cv__state">
+        <span class="cv__status" data-status></span>
+        <p class="cv__outcome" data-result></p>
+      </div>
+
+      <div class="cv__item-actions">
+        {
+          /*
+          Botao, e nao <a download>: a ancora so ganharia href depois da
+          conversao, e ancora sem href no HTML entregue é link quebrado — a
+          verificacao de build reprova, com razao. O download é disparado por
+          um <a> temporario criado na hora.
+        */
+        }
+        <button class="cv__link" type="button" data-download hidden></button>
+        <button class="cv__link" type="button" data-compare hidden></button>
+        <button class="cv__remove" type="button" data-remove>
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M7 7l10 10M17 7 7 17"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="cv__comparison" data-comparison hidden></div>
+    </li>
+  </template>
+</div>
+
+<style>
+  /* ── Casca ────────────────────────────────────────────────────────────── */
+  .cv {
+    display: grid;
+    gap: var(--space-5);
+    margin-block: var(--space-7);
+  }
+
+  .cv__section-title {
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    font-weight: 700;
+    letter-spacing: var(--tracking-snug);
+    margin-block-end: var(--space-4);
+  }
+
+  .cv__legend {
+    display: block;
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    color: var(--text);
+    margin-block-end: var(--space-3);
+  }
+
+  .cv__hint {
+    color: var(--text-faint);
+    font-size: var(--text-xs);
+    margin-block-start: var(--space-2);
+  }
+
+  /* ── Area de envio ────────────────────────────────────────────────────── */
+  .cv__drop {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-3);
+    padding: clamp(var(--space-7), 5vw, var(--space-10)) var(--space-5);
+    border: 1.5px dashed var(--border-strong);
+    border-radius: var(--radius-xl);
+    background: var(--surface);
+    text-align: center;
+    cursor: pointer;
+    transition:
+      border-color var(--duration) var(--ease-out),
+      background-color var(--duration) var(--ease-out),
+      transform var(--duration) var(--ease-out);
+  }
+
+  .cv__drop:hover,
+  .cv__drop[data-over] {
+    border-color: var(--primary);
+    background: var(--tint);
+  }
+
+  .cv__drop[data-over] {
+    transform: scale(1.005);
+  }
+
+  /* O input é o alvo real do foco; o contorno aparece na area inteira. */
+  .cv__drop:focus-within {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+  }
+
+  .cv__drop-icon {
+    width: 40px;
+    height: 40px;
+    color: var(--primary);
+  }
+
+  .cv__drop-title {
+    font-family: var(--font-display);
+    font-size: var(--text-md);
+    font-weight: 700;
+    letter-spacing: var(--tracking-snug);
+  }
+
+  .cv__drop-sub {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    margin-block-start: calc(var(--space-2) * -1);
+  }
+
+  .cv__drop-btn {
+    margin-block-start: var(--space-2);
+  }
+
+  .cv__drop-hint {
+    color: var(--text-faint);
+    font-size: var(--text-xs);
+  }
+
+  /* ── Aviso de privacidade ─────────────────────────────────────────────── */
+  .cv__privacy {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    text-align: center;
+  }
+
+  .cv__privacy svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: var(--primary);
+  }
+
+  /* ── Alertas ──────────────────────────────────────────────────────────── */
+  .cv__alert {
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+    font-size: var(--text-sm);
+    white-space: pre-line;
+  }
+
+  .cv__alert[data-tone='error'] {
+    border-color: currentColor;
+  }
+
+  /* ── Fila ─────────────────────────────────────────────────────────────── */
+  .cv__list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .cv__item {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .cv__thumb {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    background: var(--bg-subtle);
+  }
+
+  .cv__meta {
+    min-width: 0;
+  }
+
+  .cv__name {
+    font-weight: 600;
+    font-size: var(--text-sm);
+    /* Nome longo nao pode empurrar a linha inteira. */
+    overflow-wrap: anywhere;
+  }
+
+  .cv__specs {
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+    margin-block-start: var(--space-1);
+  }
+
+  .cv__badge {
+    display: inline-block;
+    margin-block-start: var(--space-2);
+    padding: 0.15rem 0.5rem;
+    border-radius: var(--radius-full);
+    background: var(--tint);
+    color: var(--primary-strong);
+    font-size: var(--text-xs);
+    font-weight: 700;
+  }
+
+  .cv__state {
+    text-align: end;
+  }
+
+  .cv__status {
+    font-family: var(--font-display);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  .cv__status[data-state='done'] {
+    color: var(--primary);
+  }
+
+  .cv__status[data-state='working'] {
+    color: var(--text);
+  }
+
+  .cv__outcome {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    margin-block-start: var(--space-1);
+  }
+
+  .cv__outcome[data-tone='good'] {
+    color: var(--primary);
+    font-weight: 700;
+  }
+
+  .cv__item-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .cv__link {
+    font-family: var(--font-display);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    color: var(--primary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    background: none;
+    border: none;
+  }
+
+  .cv__remove {
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition:
+      color var(--duration-fast) var(--ease-out),
+      border-color var(--duration-fast) var(--ease-out);
+  }
+
+  .cv__remove:hover {
+    color: var(--text);
+    border-color: var(--border-strong);
+  }
+
+  .cv__remove svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  /* ── Comparacao antes/depois ──────────────────────────────────────────── */
+  .cv__comparison {
+    grid-column: 1 / -1;
+  }
+
+  .cv__compare {
+    position: relative;
+    margin-block-start: var(--space-4);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--bg-subtle);
+  }
+
+  .cv__compare-img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .cv__compare-before {
+    position: absolute;
+    inset: 0;
+    width: var(--cv-split, 50%);
+    overflow: hidden;
+    border-inline-end: 2px solid var(--primary);
+  }
+
+  /* A imagem de dentro precisa da largura do quadro, nao da metade visivel. */
+  .cv__compare-before .cv__compare-img {
+    width: max(100cqw, 100%);
+    max-width: none;
+  }
+
+  .cv__compare {
+    container-type: inline-size;
+  }
+
+  .cv__compare-range {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: var(--space-4);
+    width: calc(100% - var(--space-8));
+    margin-inline: auto;
+    accent-color: var(--primary);
+  }
+
+  /* ── Controles ────────────────────────────────────────────────────────── */
+  .cv__controls {
+    display: grid;
+    gap: var(--space-6);
+    padding: var(--space-6);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .cv__field {
+    border: none;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+  }
+
+  .cv__formats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .cv__format {
+    position: relative;
+  }
+
+  .cv__format input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .cv__format span {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.6rem 1.1rem;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-strong);
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      border-color var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out);
+  }
+
+  .cv__format input:checked + span {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--primary-contrast);
+  }
+
+  .cv__format input:focus-visible + span {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .cv__format input:disabled + span {
+    opacity: 0.45;
+    cursor: not-allowed;
+    /* Riscado alem do esmaecido: opacidade sozinha nao comunica desativado. */
+    text-decoration: line-through;
+  }
+
+  .cv__range {
+    width: 100%;
+    accent-color: var(--primary);
+  }
+
+  .cv__presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-block-start: var(--space-4);
+  }
+
+  .cv__chip {
+    padding: 0.45rem 0.9rem;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background-color var(--duration-fast) var(--ease-out),
+      color var(--duration-fast) var(--ease-out),
+      border-color var(--duration-fast) var(--ease-out);
+  }
+
+  .cv__chip:hover {
+    color: var(--text);
+    border-color: var(--border-strong);
+  }
+
+  .cv__chip[aria-pressed='true'] {
+    background: var(--tint);
+    border-color: transparent;
+    color: var(--primary-strong);
+  }
+
+  /* ── Transparencia ────────────────────────────────────────────────────── */
+  .cv__alpha {
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius-md);
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+  }
+
+  .cv__alpha-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--text-sm);
+  }
+
+  .cv__alpha-text {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    margin-block-start: var(--space-2);
+  }
+
+  .cv__alpha-row {
+    margin-block-start: var(--space-4);
+  }
+
+  .cv__matte {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: var(--text-sm);
+    cursor: pointer;
+  }
+
+  .cv__matte input {
+    width: 44px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: none;
+    cursor: pointer;
+  }
+
+  /* ── Avancado ─────────────────────────────────────────────────────────── */
+  .cv__advanced {
+    border-top: 1px solid var(--border);
+    padding-block-start: var(--space-5);
+  }
+
+  .cv__summary {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .cv__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .cv__summary::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--primary);
+    border-bottom: 2px solid var(--primary);
+    transform: rotate(-45deg);
+    transition: transform var(--duration) var(--ease-out);
+  }
+
+  .cv__advanced[open] .cv__summary::before {
+    transform: rotate(45deg);
+  }
+
+  .cv__advanced-body {
+    margin-block-start: var(--space-5);
+  }
+
+  .cv__check {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-block-start: var(--space-5);
+    font-size: var(--text-sm);
+    cursor: pointer;
+  }
+
+  .cv__check input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+    cursor: pointer;
+  }
+
+  .cv__dims {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: var(--space-4);
+    margin-block-start: var(--space-4);
+  }
+
+  .cv__dim {
+    display: grid;
+    gap: var(--space-2);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+
+  .cv__dim input {
+    width: 120px;
+    padding: 0.55rem 0.75rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-strong);
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  /* ── Acao ─────────────────────────────────────────────────────────────── */
+  .cv__action {
+    display: grid;
+    gap: var(--space-4);
+    justify-items: center;
+  }
+
+  .cv__go {
+    padding-inline: var(--space-8);
+    font-size: var(--text-base);
+  }
+
+  .cv__go:disabled {
+    opacity: 0.6;
+    cursor: progress;
+  }
+
+  .cv__progress {
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+  }
+
+  .cv__progress-text {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    margin-block-end: var(--space-3);
+  }
+
+  .cv__track {
+    height: 6px;
+    border-radius: var(--radius-full);
+    background: var(--bg-subtle);
+    overflow: hidden;
+  }
+
+  .cv__bar {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--primary);
+    transition: width var(--duration) var(--ease-out);
+  }
+
+  /* ── Resultado ────────────────────────────────────────────────────────── */
+  .cv__results {
+    padding: var(--space-6);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .cv__totals {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: var(--space-4);
+  }
+
+  .cv__total {
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    background: var(--bg-subtle);
+    text-align: center;
+  }
+
+  .cv__total-label {
+    display: block;
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+  }
+
+  .cv__total-value {
+    display: block;
+    margin-block-start: var(--space-2);
+    font-family: var(--font-display);
+    font-size: var(--text-md);
+  }
+
+  .cv__total[data-tone='good'] .cv__total-value {
+    color: var(--primary);
+  }
+
+  .cv__result-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-block-start: var(--space-5);
+  }
+
+  /* ── Telas estreitas ──────────────────────────────────────────────────── */
+  @media (max-width: 640px) {
+    .cv__item {
+      grid-template-columns: 56px minmax(0, 1fr);
+      row-gap: var(--space-3);
+    }
+
+    .cv__thumb {
+      width: 56px;
+      height: 56px;
+    }
+
+    .cv__state,
+    .cv__item-actions {
+      grid-column: 2;
+      text-align: start;
+      justify-content: flex-start;
+    }
+
+    .cv__controls,
+    .cv__results {
+      padding: var(--space-5) var(--space-4);
+    }
+
+    .cv__go {
+      width: 100%;
+    }
+
+    .cv__dim input {
+      width: 100%;
+    }
+
+    .cv__dim {
+      flex: 1 1 140px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cv__drop,
+    .cv__bar,
+    .cv__summary::before {
+      transition: none;
+    }
+
+    .cv__drop[data-over] {
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  import { mountConverter } from '@/lib/converter/ui';
+
+  mountConverter();
+</script>

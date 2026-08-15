@@ -4,6 +4,7 @@ import { z } from 'astro/zod';
 
 import { CATEGORY_KEYS } from './config/categories';
 import { LOCALES } from './i18n/locales';
+import { uploadFileName } from './lib/upload-path';
 
 /**
  * Slug seguro para URL: minusculas, sem acento, sem barra. Bloqueia no build
@@ -31,6 +32,27 @@ const urlSlugOpcional = z.preprocess(
   (valor) => (typeof valor === 'string' && valor.trim() === '' ? undefined : valor),
   urlSlug.optional(),
 );
+
+/**
+ * Reescreve o caminho da capa vinda do CMS para o formato que o `image()` do
+ * Astro resolve: relativo ao proprio arquivo .md. A motivacao completa esta em
+ * `src/lib/upload-path.ts`; o par para o corpo do texto é
+ * `src/plugins/remark-upload-path.ts`.
+ *
+ * Aqui a profundidade é fixa por colecao, e nao calculada como no plugin: o
+ * schema nao recebe o caminho do arquivo que esta validando.
+ *
+ * @param niveis Subida ate a raiz de `src/`, a partir do .md.
+ *   `../../../` para blog e pages (`src/content/<colecao>/<idioma>/x.md`),
+ *   `../../` para autores (`src/content/authors/x.md`).
+ */
+const upload = (niveis: string) => (valor: unknown) => {
+  if (typeof valor !== 'string') return valor;
+
+  const arquivo = uploadFileName(valor);
+
+  return arquivo === undefined ? valor : `${niveis}assets/uploads/${arquivo}`;
+};
 
 const reference_ = z.object({
   title: z.string().min(3),
@@ -71,7 +93,7 @@ const blog = defineCollection({
         author: reference('authors').optional(),
         /** Revisao tecnica: sinal de confianca em conteudo de saude (E-E-A-T). */
         reviewer: reference('authors').optional(),
-        cover: image().optional(),
+        cover: z.preprocess(upload('../../../'), image().optional()),
         coverAlt: z.string().min(5).optional(),
         tags: z.array(z.string().min(2)).max(8).default([]),
         featured: z.boolean().default(false),
@@ -110,7 +132,7 @@ const authors = defineCollection({
         /** Cargo/credencial exibido junto da assinatura. */
         role: z.object({ pt: z.string().min(2), en: z.string().min(2) }),
         bio: z.object({ pt: z.string().min(20), en: z.string().min(20) }),
-        avatar: image().optional(),
+        avatar: z.preprocess(upload('../../'), image().optional()),
         /** Registro profissional (CRN/CRM). Reforca autoridade em saude. */
         credential: z.string().optional(),
         links: z

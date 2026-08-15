@@ -4,6 +4,8 @@ summary: Fibras solúveis e insolúveis atuam de formas diferentes na saciedade,
 category: nutrition
 publishedAt: 2026-08-02
 updatedAt: 2026-08-15
+cover: /src/assets/uploads/imagem1.png
+coverAlt: Alimentos ricos em fibras, como aveia, frutas, sementes, legumes e vegetais, organizados em uma composição saudável e natural.
 tags:
   - fibras
   - intestino

@@ -15,6 +15,7 @@ const pt = {
     close: 'Fechar',
     skipToContent: 'Pular para o conteúdo',
     backToTop: 'Voltar ao topo',
+    imageConverter: 'Conversor de imagens',
   },
   header: {
     searchLabel: 'Pesquisar',
@@ -106,6 +107,108 @@ const pt = {
       'Todo o acervo da Vitualha: alimentos, nutrientes, saúde, fitness e receitas.',
     searchDescription: 'Busque artigos sobre alimentos, nutrientes, saúde e receitas.',
   },
+  /**
+   * Conversor de imagens. Este bloco é o unico que atravessa a fronteira do
+   * servidor: vai inteiro para o HTML como JSON e é lido pelo script da
+   * ferramenta. Ver src/components/converter/ImageConverter.astro.
+   *
+   * `{x}` sao marcadores substituidos em tempo de execucao.
+   */
+  converter: {
+    // Privacidade — a promessa central da ferramenta.
+    privacyNotice:
+      'Suas imagens são processadas diretamente no seu navegador e não são enviadas para nossos servidores.',
+
+    // Area de envio
+    dropTitle: 'Arraste suas imagens PNG aqui',
+    dropSubtitle: 'ou clique para selecionar',
+    dropButton: 'Selecionar imagens',
+    dropHint: 'PNG até {size} por arquivo · no máximo {count} imagens',
+    dropPaste: 'Você também pode colar uma imagem com Ctrl+V.',
+    dropAria: 'Selecionar imagens PNG para converter',
+
+    // Lista de arquivos
+    queueTitle: 'Imagens selecionadas',
+    remove: 'Remover',
+    removeAria: 'Remover {name} da lista',
+    transparency: 'Transparência',
+    clearAll: 'Limpar lista',
+
+    // Estados de cada arquivo
+    statusWaiting: 'Aguardando',
+    statusWorking: 'Convertendo',
+    statusDone: 'Concluído',
+    statusError: 'Erro',
+
+    // Formato
+    formatLegend: 'Converter para',
+    formatUnsupported: 'Seu navegador não oferece suporte a este formato.',
+
+    // Qualidade
+    qualityLabel: 'Qualidade',
+    qualityValue: 'Qualidade: {value}%',
+    presetSmaller: 'Tamanho menor',
+    presetBalanced: 'Equilibrado',
+    presetHigh: 'Alta qualidade',
+    presetMaximum: 'Máxima qualidade',
+
+    // Transparência
+    alphaTitle: 'PNG com transparência detectada',
+    alphaText:
+      'JPEG não suporta transparência. Escolha a cor que substituirá as áreas transparentes.',
+    alphaWhite: 'Branco',
+    alphaBlack: 'Preto',
+    alphaCustom: 'Personalizado',
+    alphaPick: 'Escolher cor de fundo',
+
+    // Dimensões
+    advanced: 'Configurações avançadas',
+    sizeLegend: 'Dimensões',
+    sizeOriginal: 'Manter resolução original',
+    sizeResize: 'Redimensionar imagem',
+    width: 'Largura',
+    height: 'Altura',
+    keepRatio: 'Manter proporção',
+    sizePresetOriginal: 'Original',
+    sizePresetHint: 'Reduz pelo maior lado. Nunca amplia.',
+
+    // Ação
+    convert: 'Converter imagens',
+    converting: 'Convertendo...',
+    progress: 'Convertendo {done} de {total} imagens',
+    restart: 'Converter novas imagens',
+
+    // Resultado
+    resultsTitle: 'Resultado',
+    before: 'Antes',
+    after: 'Depois',
+    reduction: 'Redução',
+    originalSize: 'Tamanho original',
+    newSize: 'Novo tamanho',
+    grew: 'O arquivo convertido ficou {percent}% maior que o original.',
+    download: 'Baixar imagem',
+    downloadAria: 'Baixar {name}',
+    downloadAll: 'Baixar tudo',
+    compare: 'Comparar antes e depois',
+    compareClose: 'Fechar comparação',
+    compareAria: 'Arraste para comparar o original com o convertido',
+    compareBefore: 'Original',
+    compareAfter: 'Convertido',
+
+    // Erros
+    errorNotPng: 'Este arquivo não parece ser uma imagem PNG válida.',
+    errorTooLarge: 'Esta imagem é maior que o limite de {size}.',
+    errorTooManyPixels:
+      'A imagem é muito grande para ser processada com segurança neste dispositivo.',
+    errorTooManyFiles: 'A lista aceita no máximo {count} imagens de uma vez.',
+    errorUnreadable: 'Não foi possível ler este arquivo.',
+    errorEncode: 'Não foi possível converter esta imagem. Tente novamente.',
+    errorUnsupported: 'Seu navegador não oferece suporte a este formato.',
+    errorMemory: 'Não há memória suficiente neste dispositivo para converter esta imagem.',
+    errorDecode: 'Não foi possível abrir esta imagem. O arquivo pode estar corrompido.',
+    errorNoScript: 'O conversor precisa de JavaScript para funcionar no seu navegador.',
+    errorRejected: '{count} arquivo(s) não entraram na lista.',
+  },
 } satisfies Record<string, Record<string, string>>;
 
 export type UIDict = typeof pt;
@@ -120,6 +223,7 @@ const en: UIDict = {
     close: 'Close',
     skipToContent: 'Skip to content',
     backToTop: 'Back to top',
+    imageConverter: 'Image converter',
   },
   header: {
     searchLabel: 'Search',
@@ -210,6 +314,89 @@ const en: UIDict = {
     articlesDescription:
       'The full Vitualha archive: foods, nutrients, health, fitness and recipes.',
     searchDescription: 'Search articles about foods, nutrients, health and recipes.',
+  },
+  converter: {
+    privacyNotice:
+      'Your images are processed directly in your browser and are not uploaded to our servers.',
+
+    dropTitle: 'Drop your PNG images here',
+    dropSubtitle: 'or click to select',
+    dropButton: 'Select images',
+    dropHint: 'PNG up to {size} per file · {count} images at most',
+    dropPaste: 'You can also paste an image with Ctrl+V.',
+    dropAria: 'Select PNG images to convert',
+
+    queueTitle: 'Selected images',
+    remove: 'Remove',
+    removeAria: 'Remove {name} from the list',
+    transparency: 'Transparency',
+    clearAll: 'Clear list',
+
+    statusWaiting: 'Waiting',
+    statusWorking: 'Converting',
+    statusDone: 'Done',
+    statusError: 'Error',
+
+    formatLegend: 'Convert to',
+    formatUnsupported: 'Your browser does not support this format.',
+
+    qualityLabel: 'Quality',
+    qualityValue: 'Quality: {value}%',
+    presetSmaller: 'Smaller file',
+    presetBalanced: 'Balanced',
+    presetHigh: 'High quality',
+    presetMaximum: 'Maximum quality',
+
+    alphaTitle: 'Transparent PNG detected',
+    alphaText:
+      'JPEG does not support transparency. Choose the colour that will replace transparent areas.',
+    alphaWhite: 'White',
+    alphaBlack: 'Black',
+    alphaCustom: 'Custom',
+    alphaPick: 'Pick a background colour',
+
+    advanced: 'Advanced settings',
+    sizeLegend: 'Dimensions',
+    sizeOriginal: 'Keep original resolution',
+    sizeResize: 'Resize image',
+    width: 'Width',
+    height: 'Height',
+    keepRatio: 'Keep aspect ratio',
+    sizePresetOriginal: 'Original',
+    sizePresetHint: 'Scales down by the longest edge. Never upscales.',
+
+    convert: 'Convert images',
+    converting: 'Converting...',
+    progress: 'Converting {done} of {total} images',
+    restart: 'Convert new images',
+
+    resultsTitle: 'Result',
+    before: 'Before',
+    after: 'After',
+    reduction: 'Reduction',
+    originalSize: 'Original size',
+    newSize: 'New size',
+    grew: 'The converted file is {percent}% larger than the original.',
+    download: 'Download image',
+    downloadAria: 'Download {name}',
+    downloadAll: 'Download all',
+    compare: 'Compare before and after',
+    compareClose: 'Close comparison',
+    compareAria: 'Drag to compare the original with the converted image',
+    compareBefore: 'Original',
+    compareAfter: 'Converted',
+
+    errorNotPng: 'This file does not look like a valid PNG image.',
+    errorTooLarge: 'This image is larger than the {size} limit.',
+    errorTooManyPixels: 'This image is too large to be processed safely on this device.',
+    errorTooManyFiles: 'The list accepts at most {count} images at a time.',
+    errorUnreadable: 'This file could not be read.',
+    errorEncode: 'This image could not be converted. Please try again.',
+    errorUnsupported: 'Your browser does not support this format.',
+    errorMemory: 'There is not enough memory on this device to convert this image.',
+    errorDecode: 'This image could not be opened. The file may be corrupted.',
+    errorNoScript: 'The converter needs JavaScript to run in your browser.',
+    errorRejected: '{count} file(s) were not added to the list.',
   },
 };
 

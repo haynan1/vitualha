@@ -1,6 +1,6 @@
 import { CATEGORY_LIST } from '../config/categories';
 import type { Locale } from '../i18n/locales';
-import { articlesUrl, categoryUrl, homeUrl, route } from '../i18n/routes';
+import { articlesUrl, categoryUrl, homeUrl, imageConverterUrl, route } from '../i18n/routes';
 import { t } from '../i18n/ui';
 
 export type NavItem = { label: string; href: string };
@@ -30,10 +30,15 @@ export function footerColumns(locale: Locale): FooterColumn[] {
   return [
     {
       heading: ui.footer.contentHeading,
-      items: CATEGORY_LIST.map((category) => ({
-        label: category[locale].name,
-        href: categoryUrl(locale, category[locale].slug),
-      })),
+      items: [
+        ...CATEGORY_LIST.map((category) => ({
+          label: category[locale].name,
+          href: categoryUrl(locale, category[locale].slug),
+        })),
+        // Ferramenta gratuita do site. Sem link no rodape ela so existiria
+        // para quem chegasse pela busca do Google.
+        { label: ui.nav.imageConverter, href: imageConverterUrl(locale) },
+      ],
     },
     {
       heading: ui.footer.institutionalHeading,

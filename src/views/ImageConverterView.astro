@@ -1,0 +1,181 @@
+---
+import AdSlot from '@/components/AdSlot.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import Faq from '@/components/Faq.astro';
+import ImageConverter from '@/components/converter/ImageConverter.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+import { CONVERTER } from '@/config/converter';
+import { LOCALES, type Locale } from '@/i18n/locales';
+import { homeUrl, imageConverterUrl } from '@/i18n/routes';
+import { t } from '@/i18n/ui';
+import { FORMAT_LABEL, OUTPUT_FORMATS } from '@/lib/converter/formats';
+import type { Crumb } from '@/lib/navigation';
+import { breadcrumbSchema, faqSchema, webApplicationSchema } from '@/lib/seo';
+
+import '@/styles/prose.css';
+
+type Props = { locale: Locale };
+
+const { locale } = Astro.props;
+const ui = t(locale);
+const copy = CONVERTER[locale];
+
+const localeUrls = Object.fromEntries(
+  LOCALES.map((option) => [option, imageConverterUrl(option)]),
+) as Record<Locale, string>;
+
+const trail: Crumb[] = [
+  { name: ui.breadcrumb.home, url: homeUrl(locale) },
+  { name: copy.h1, url: imageConverterUrl(locale) },
+];
+
+/**
+ * Recursos declarados no JSON-LD. Sao os formatos que a ferramenta realmente
+ * gera — a lista sai do mesmo catalogo que o seletor usa, entao nunca promete
+ * ao buscador um formato que a interface nao oferece.
+ */
+const featureList = OUTPUT_FORMATS.map((format) => `PNG → ${FORMAT_LABEL[format]}`);
+---
+
+<BaseLayout
+  title={copy.metaTitle}
+  description={copy.metaDescription}
+  locale={locale}
+  localeUrls={localeUrls}
+  brandedTitle={false}
+  ads="listing"
+  schema={[
+    breadcrumbSchema(trail, Astro.site),
+    webApplicationSchema({
+      name: copy.h1,
+      description: copy.metaDescription,
+      url: imageConverterUrl(locale),
+      locale,
+      featureList,
+      site: Astro.site,
+    }),
+    faqSchema([...copy.faq]),
+  ]}
+>
+  <div class="container container--narrow tool">
+    <Breadcrumbs locale={locale} trail={trail} />
+
+    <header class="tool__head">
+      <h1 class="tool__title">{copy.h1}</h1>
+      <p class="tool__intro">{copy.intro}</p>
+    </header>
+
+    {/* [FERRAMENTA] — sem anuncio entre o botao e o resultado. */}
+    <ImageConverter locale={locale} />
+
+    {/* [CONTEUDO] */}
+    <div class="prose tool__prose">
+      {
+        copy.sections.map((section) => (
+          <section>
+            <h2>{section.heading}</h2>
+            {section.body.map((paragraph) => (
+              <p>{paragraph}</p>
+            ))}
+          </section>
+        ))
+      }
+
+      <section>
+        <h2>{copy.tableHeading}</h2>
+        <div class="tool__table-wrap">
+          <table class="tool__table">
+            <thead>
+              <tr>
+                <th scope="col">{copy.tableFormatLabel}</th>
+                <th scope="col">{copy.tableNoteLabel}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                copy.table.map((row) => (
+                  <tr>
+                    <th scope="row">{row.format}</th>
+                    <td>{row.note}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    {/* [ANUNCIO] — depois do conteudo e antes do FAQ, longe dos controles. */}
+    <AdSlot name="listing" locale={locale} minHeight={280} class="tool__ad" />
+
+    {/* [FAQ] */}
+    <Faq locale={locale} items={[...copy.faq]} />
+  </div>
+</BaseLayout>
+
+<style>
+  .tool {
+    padding-block: var(--space-6) var(--space-9);
+  }
+
+  .tool__head {
+    max-width: var(--measure);
+    margin-block: var(--space-6) var(--space-7);
+  }
+
+  .tool__title {
+    font-size: var(--text-2xl);
+  }
+
+  .tool__intro {
+    margin-block-start: var(--space-4);
+    color: var(--text-muted);
+    font-size: var(--text-md);
+    line-height: var(--leading-relaxed);
+  }
+
+  .tool__prose {
+    margin-block-start: var(--space-9);
+    padding-block-start: var(--space-7);
+    border-top: 1px solid var(--border);
+  }
+
+  /* Tabela estreita nunca deve empurrar a pagina na horizontal. */
+  .tool__table-wrap {
+    overflow-x: auto;
+  }
+
+  .tool__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+  }
+
+  .tool__table th,
+  .tool__table td {
+    padding: var(--space-3) var(--space-4);
+    text-align: start;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  .tool__table thead th {
+    font-family: var(--font-display);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    color: var(--text-muted);
+  }
+
+  .tool__table tbody th {
+    font-family: var(--font-display);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .tool__ad {
+    margin-block: var(--space-8);
+  }
+</style>

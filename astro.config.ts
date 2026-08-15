@@ -9,6 +9,7 @@ import { loadEnv } from 'vite';
 import { remarkCallouts } from './src/plugins/remark-callouts';
 import { rehypeInArticleAd } from './src/plugins/rehype-in-article-ad';
 import { rehypeTableScroll } from './src/plugins/rehype-table-scroll';
+import { remarkUploadPath } from './src/plugins/remark-upload-path';
 import { DEFAULT_LOCALE, LOCALES } from './src/i18n/locales';
 
 const mode = process.env.NODE_ENV ?? 'production';
@@ -66,6 +67,14 @@ export default defineConfig({
   },
 
   vite: {
+    /**
+     * O pacote do encoder AVIF traz um modulo Emscripten que localiza o proprio
+     * .wasm em tempo de execucao. O pre-bundling do Vite reescreve esses
+     * caminhos e o modulo passa a procurar um arquivo que nao existe — falha
+     * que so aparece ao converter, nunca no build. Fora do otimizador, ele é
+     * servido como esta.
+     */
+    optimizeDeps: { exclude: ['@jsquash/avif'] },
     build: {
       /**
        * Zero significa "nunca embutir": scripts e assets pequenos sairiam
@@ -100,7 +109,10 @@ export default defineConfig({
      * quando o ecossistema de plugins do Sätteri cobrir esses tres casos.
      */
     processor: unified({
-      remarkPlugins: [remarkDirective, remarkCallouts],
+      // remarkUploadPath vem antes de tudo: normaliza o caminho das imagens
+      // gravadas pelo editor visual enquanto o nó ainda é um `image` cru, e
+      // antes de o Astro tentar resolver o arquivo.
+      remarkPlugins: [remarkUploadPath, remarkDirective, remarkCallouts],
       rehypePlugins: [
         // Precisa rodar antes do autolink: sem id no titulo, nao existe
         // ancora para o plugin ligar. Ids ja existentes sao preservados,

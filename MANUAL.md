@@ -267,9 +267,16 @@ Por arquivo, o caminho é **relativo ao artigo**, com três níveis de subida:
 Os `../../../` saem de `src/content/blog/pt/` e chegam em `src/assets/`. Vale
 para artigos nos dois idiomas, porque a profundidade é a mesma.
 
-**Não use caminho começando com barra.** `/src/assets/uploads/foto.jpg` não
-dá erro no build, não aparece em teste nenhum, e quebra no site: a imagem sai
-sem otimização, apontando para um endereço que não existe. Testado.
+Caminho começando com barra (`/src/assets/uploads/foto.jpg`) também funciona:
+é o formato que o editor visual grava, e o site normaliza os dois na hora do
+build. O número de `../` errado igualmente — o build corrige a partir da
+posição real do arquivo.
+
+Isso nem sempre foi verdade. Antes, barra inicial passava no build e quebrava
+só no site publicado, sem otimização e apontando para um endereço inexistente.
+Quem cuida disso agora são `src/plugins/remark-upload-path.ts` (corpo do
+texto) e o helper `upload` em `src/content.config.ts` (capa), cobertos por
+`tests/upload-path.test.ts`.
 
 ### Quantas quiser, onde quiser
 
@@ -323,6 +330,14 @@ O pipeline também aceita HEIC — o formato que o iPhone usa por padrão — ma
 converter para JPG antes de subir evita surpresa e mantém o repositório legível
 para qualquer editor.
 
+**Quando o arquivo que você tem é PNG** — captura de tela, exportação do Figma,
+arte com fundo transparente — o próprio site converte, em
+`/ferramentas/conversor-de-imagens/`. Ver [Conversor de
+imagens](#conversor-de-imagens).
+
+PNG de fotografia é o caso que mais compensa: são os arquivos de vários
+megabytes que incham o repositório sem melhorar nada na tela.
+
 ### Que tamanho subir
 
 **Largura de 1600 px, qualidade 85–90.** Esse é o número que importa.
@@ -343,6 +358,12 @@ veja diferença.
 **Como redimensionar antes de subir:** qualquer editor serve. No Windows,
 Fotos → Redimensionar → Personalizado → largura 1600. No celular, a maioria
 dos apps de foto tem "exportar em tamanho médio".
+
+Se a imagem for PNG, o conversor do próprio site faz as duas coisas de uma vez
+— redimensiona e troca o formato — e mostra o peso final antes de você baixar,
+que é justamente o número desta seção. Em **Configurações avançadas** existe um
+preset de 1600 px. Ele nunca amplia: pedir 1600 numa imagem de 800 px devolve
+os 800 originais.
 
 ### Peso do arquivo
 
@@ -567,6 +588,35 @@ ficha existir.
 
 `src/content/pages/pt/` — sobre, contato, política editorial, privacidade,
 termos. Mesma lógica dos artigos, com menos campos.
+
+### Conversor de imagens
+
+Uma ferramenta gratuita hospedada no site, em duas rotas:
+
+- `/ferramentas/conversor-de-imagens/`
+- `/en/tools/image-converter/`
+
+Recebe **PNG** e devolve JPG, WebP ou AVIF, com controle de qualidade e
+redimensionamento opcional. Está no rodapé, na coluna **Conteúdo**.
+
+**Não procure no editor visual — não está lá.** O título, a introdução, os
+textos explicativos e as perguntas frequentes moram em
+`src/config/converter.ts`, junto com o código. É a mesma escolha das
+categorias: são estrutura da página, não publicação. Mudar exige commit, como
+qualquer alteração de código.
+
+Isso é proposital, e o motivo é o parágrafo seguinte.
+
+**A conversão acontece no navegador de quem usa.** Nenhum arquivo é enviado
+para o servidor, para serviço de terceiro ou para armazenamento nenhum — e a
+página afirma isso em dois lugares: no aviso ao lado da área de envio e na
+última pergunta do FAQ. Se algum dia a implementação mudar, esses dois textos
+têm de mudar junto. Deixá-los no CMS abriria a porta para a promessa e o código
+se separarem sem ninguém perceber; no mesmo repositório, a mudança aparece no
+mesmo commit.
+
+O espaço de anúncio da página usa o slot `listing`, o mesmo da home e das
+listagens, e fica entre o conteúdo e o FAQ — nunca perto dos controles.
 
 ### Newsletter
 
