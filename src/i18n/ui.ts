@@ -14,6 +14,7 @@ const pt = {
     menu: 'Menu',
     close: 'Fechar',
     skipToContent: 'Pular para o conteúdo',
+    backToTop: 'Voltar ao topo',
   },
   header: {
     searchLabel: 'Pesquisar',
@@ -44,7 +45,6 @@ const pt = {
     shareTitle: 'Compartilhar',
     copyLink: 'Copiar link',
     linkCopied: 'Link copiado',
-    backToTop: 'Voltar ao topo',
     noTranslationNotice:
       'Este artigo ainda não possui tradução completa em inglês. Exibindo o conteúdo original em português.',
     medicalDisclaimer:
@@ -119,6 +119,7 @@ const en: UIDict = {
     menu: 'Menu',
     close: 'Close',
     skipToContent: 'Skip to content',
+    backToTop: 'Back to top',
   },
   header: {
     searchLabel: 'Search',
@@ -149,7 +150,6 @@ const en: UIDict = {
     shareTitle: 'Share',
     copyLink: 'Copy link',
     linkCopied: 'Link copied',
-    backToTop: 'Back to top',
     noTranslationNotice:
       'This article does not yet have a full English translation. Showing the original Portuguese content.',
     medicalDisclaimer:

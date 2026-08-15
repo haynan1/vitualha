@@ -4,7 +4,6 @@ import type { MarkdownHeading } from 'astro';
 import AdSlot from '@/components/AdSlot.astro';
 import ArticleGrid from '@/components/ArticleGrid.astro';
 import AuthorCard from '@/components/AuthorCard.astro';
-import BackToTop from '@/components/BackToTop.astro';
 import Breadcrumbs from '@/components/Breadcrumbs.astro';
 import CoverImage from '@/components/CoverImage.astro';
 import Faq from '@/components/Faq.astro';
@@ -82,8 +81,6 @@ const canonical = isFallback ? absolute(localeUrls[contentLocale], Astro.site) :
   schema={schema}
   ads="article"
 >
-  <BackToTop locale={locale} />
-
   <div class="shell container">
     <div class="shell__top" data-pagefind-ignore>
       <Breadcrumbs locale={locale} trail={trail} />

@@ -1,4 +1,5 @@
 ---
+import BackToTop from '@/components/BackToTop.astro';
 import BaseHead from '@/components/BaseHead.astro';
 import Footer from '@/components/Footer.astro';
 import Header from '@/components/Header.astro';
@@ -85,5 +86,14 @@ const documentTitle = brandedTitle ? `${title} — ${SITE.name}` : title;
     </main>
 
     <Footer locale={locale} />
+
+    {
+      /* Fica na casca, e nao em cada view: uma pagina de categoria com muitos
+        artigos ou o acervo inteiro rolam tanto quanto um artigo longo, e nao
+        havia razao para o atalho existir so na leitura. O botao se esconde
+        sozinho enquanto o topo estiver visivel, entao em pagina curta ele
+        nunca aparece — nao ha custo em declarar aqui para todas. */
+    }
+    <BackToTop locale={locale} />
   </body>
 </html>
