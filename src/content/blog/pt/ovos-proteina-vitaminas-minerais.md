@@ -7,6 +7,9 @@ tags:
   - ovos
   - proteína
   - colesterol
+featured: false
+draft: false
+noindex: false
 references:
   - title: Eggs and cardiovascular disease risk — an update
     url: https://pubmed.ncbi.nlm.nih.gov/32132002/
