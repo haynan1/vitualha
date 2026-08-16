@@ -4,7 +4,7 @@ summary: Find out how much protein the body actually requires, which sources are
 permalink: protein-how-much-do-we-need
 category: nutrition
 publishedAt: 2026-08-10
-cover: /src/assets/uploads/imagem4.webp
+cover: /src/assets/uploads/proteina-quanto-precisamos-capa.webp
 coverAlt: A variety of protein-rich foods, including meat, eggs, fish, dairy, legumes, tofu, and nuts.
 tags:
   - protein

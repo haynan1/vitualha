@@ -4,7 +4,7 @@ summary: Soluble and insoluble fibers work in different ways on satiety, the gut
 category: nutrition
 publishedAt: 2026-08-02
 updatedAt: 2026-08-15
-cover: /src/assets/uploads/imagem1.png
+cover: /src/assets/uploads/fibras-por-que-sao-importantes-capa.png
 coverAlt: Foods rich in fiber, like oats, fruits, seeds, legumes, and vegetables, arranged in a healthy and natural combination.
 tags:
   - fibers

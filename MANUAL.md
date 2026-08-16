@@ -278,6 +278,34 @@ Quem cuida disso agora são `src/plugins/remark-upload-path.ts` (corpo do
 texto) e o helper `upload` em `src/content.config.ts` (capa), cobertos por
 `tests/upload-path.test.ts`.
 
+### O nome do arquivo não é problema seu
+
+Todas as imagens moram na mesma pasta — não há subpasta por artigo. Isso quer
+dizer que dois arquivos com o mesmo nome não podem coexistir: subir uma
+`imagem.png` quando já existe uma **substitui** a antiga, e o artigo que a
+usava passa a exibir a imagem nova. O build continua verde e nada avisa.
+
+Por isso você não precisa inventar nome nenhum. Suba com o nome que vier da
+câmera ou do editor. Na próxima vez que rodar `npm run dev` ou `npm run build`,
+o `prepare:assets` renomeia cada imagem a partir do artigo que a usa e corrige
+as referências nos dois idiomas:
+
+```
+imagem.png   →  creatina-o-que-a-ciencia-diz-capa.png
+IMG_2831.jpg →  frutas-com-vitamina-c-01.jpg
+```
+
+A capa vira `-capa`; as do corpo são numeradas na ordem em que aparecem no
+texto. O nome sai do permalink do artigo em português, que é único — então
+colisão deixa de ser possível. De quebra, nome de arquivo conta no Google
+Imagens, e `frutas-com-vitamina-c-01.jpg` diz algo que `imagem4.webp` não diz.
+
+Traduções do mesmo artigo dividem as imagens, e isso é esperado. O que o
+`verify:build` reprova é **dois artigos diferentes** apontando para o mesmo
+arquivo — sintoma clássico de um upload ter sobrescrito o do outro. A saída
+nesse caso é uma cópia para cada artigo. Ele também avisa (sem reprovar) sobre
+imagem que nenhum artigo usa.
+
 ### Quantas quiser, onde quiser
 
 Não há limite nem posição fixa. Cada `![...]` no meio do texto vira uma

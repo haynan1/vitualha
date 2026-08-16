@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
- * Copia para public/ os assets que vem de dependencias npm: as fontes usadas
- * e o bundle do CMS.
+ * Prepara o que o build consome antes de o Astro rodar: normaliza o nome das
+ * imagens enviadas pelo editor e copia para public/ os assets que vem de
+ * dependencias npm — as fontes usadas e o bundle do CMS.
  *
  * Por que copiar em vez de importar/CDN:
  *  - fonte com caminho estavel (/fonts/...) pode ser pre-carregada no <head>,
@@ -12,9 +13,11 @@
  * Idempotente: rodar de novo so reescreve o que mudou de tamanho.
  */
 import { createRequire } from 'node:module';
-import { copyFile, mkdir, readFile, stat, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, rename, stat, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { REFERENCIA, UPLOADS_DIR, decodeNome, planejarUploads } from './lib/uploads.mjs';
 
 const require = createRequire(import.meta.url);
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -210,8 +213,76 @@ async function generateFaviconIco() {
   }
 }
 
+/**
+ * Da a toda imagem de upload um nome derivado do artigo que a usa, e corrige a
+ * referencia nos dois idiomas na mesma passada.
+ *
+ * Por que aqui e nao no momento do envio: o Sveltia grava o arquivo direto no
+ * repositorio com o nome que veio da maquina de quem enviou (`IMG_2831.jpg`,
+ * `imagem.png`), e nao ha gancho no CMS para renomear antes disso. O
+ * `prepare:assets` é o primeiro instante em que codigo do projeto roda depois
+ * do envio — ele corre antes de `dev` e de `build`, entao o nome ja esta certo
+ * quando o autor abre o site para conferir.
+ *
+ * Renomear é o que torna colisao improvavel: o nome deixa de ser escolhido por
+ * quem envia e passa a ser derivado do artigo, que é unico por construcao.
+ * Idempotente — quando o nome ja esta no padrao, nao ha o que fazer.
+ */
+async function renameUploads() {
+  const { artigos, renomeios, compartilhados } = await planejarUploads(root);
+
+  for (const { arquivo, chaves } of compartilhados) {
+    console.warn(
+      `[assets] ${arquivo} é usado por ${chaves.length} artigos (${chaves.join(', ')}) — ` +
+        'renomear quebraria um deles; envie uma copia para cada artigo',
+    );
+  }
+
+  /** So o que de fato mudou em disco pode ser reescrito no texto. */
+  const aplicados = new Map();
+
+  for (const { de, para } of renomeios) {
+    const origem = join(root, UPLOADS_DIR, de);
+    const destino = join(root, UPLOADS_DIR, para);
+
+    // Referencia sem arquivo é problema do verify:build, que aponta a pagina.
+    if ((await sizeOf(origem)) < 0) continue;
+
+    if ((await sizeOf(destino)) >= 0) {
+      console.warn(`[assets] ${para} ja existe — ${de} ficou com o nome antigo`);
+      continue;
+    }
+
+    await rename(origem, destino);
+    aplicados.set(de, para);
+  }
+
+  if (aplicados.size === 0) return 0;
+
+  for (const artigo of artigos) {
+    for (const caminho of artigo.arquivos) {
+      const antes = await readFile(join(root, caminho), 'utf8');
+
+      // Uma passada so: o nome novo nunca entra como candidato a ser trocado
+      // de novo, entao nao ha risco de renomeio em cascata.
+      const depois = antes.replace(REFERENCIA, (match, prefixo, nome) => {
+        const novo = aplicados.get(decodeNome(nome));
+        return novo === undefined ? match : `${prefixo}${novo}`;
+      });
+
+      if (depois !== antes) await writeFile(join(root, caminho), depois);
+    }
+  }
+
+  for (const [de, para] of aplicados) console.log(`[assets] imagem renomeada: ${de} -> ${para}`);
+
+  return aplicados.size;
+}
+
 async function main() {
   let copied = 0;
+
+  const renamed = await renameUploads();
 
   for (const [pkg, file] of FONTS) {
     const changed = await copyIfChanged(
@@ -235,6 +306,13 @@ async function main() {
       ? `[assets] ${copied} arquivo(s) atualizado(s) em public/`
       : '[assets] public/ ja esta em dia',
   );
+
+  if (renamed > 0) {
+    console.log(
+      `[assets] ${renamed} imagem(ns) renomeada(s) — os artigos foram atualizados, ` +
+        'confira o diff antes de commitar',
+    );
+  }
 }
 
 main().catch((error) => {

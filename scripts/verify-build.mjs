@@ -13,6 +13,11 @@ import { readdir, readFile, stat } from 'node:fs/promises';
 import { dirname, join, posix, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { UPLOADS_DIR, planejarUploads } from './lib/uploads.mjs';
+
+/** Rotulo estavel entre sistemas — o resto do relatorio usa barra normal. */
+const uploads = UPLOADS_DIR.replaceAll(sep, posix.sep);
+
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const dist = join(root, 'dist');
 
@@ -43,9 +48,24 @@ async function exists(path) {
   }
 }
 
+/**
+ * A URL no HTML vem percent-encoded — espaco vira %20, acento vira %C3%A7 — e o
+ * arquivo em dist/ tem o nome literal. Comparar os dois sem decodificar reprova
+ * asset que funciona em producao (o servidor decodifica antes de resolver o
+ * caminho), e um gate que acusa erro onde nao ha e o gate que as pessoas
+ * aprendem a ignorar.
+ */
+function decodePath(value) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value; // encoding malformado: compara como veio e deixa reprovar
+  }
+}
+
 /** `/artigos/foo/` -> dist/artigos/foo/index.html */
 function targetFor(href) {
-  const clean = href.split('#')[0].split('?')[0];
+  const clean = decodePath(href.split('#')[0].split('?')[0]);
   if (!clean || clean === '/') return join(dist, 'index.html');
 
   const relativePath = clean.replace(/^\//, '').replaceAll('/', sep);
@@ -165,6 +185,49 @@ async function checkHtml(file, allFiles) {
   }
 }
 
+/**
+ * Nome das imagens de upload — a unica checagem daqui que olha para o codigo
+ * fonte, e nao para o dist.
+ *
+ * A razao de morar aqui e nao nos testes de conteudo é o tipo de falha: uma
+ * imagem sobrescrita nao quebra nada. O build passa, o teste passa, a pagina
+ * renderiza — so que exibindo a imagem de outro artigo. Nao existe um HTML
+ * "errado" para inspecionar; o defeito so é visivel comparando quem usa o que.
+ * Como isso vai para producao sem nenhum sintoma, o lugar certo de barrar é a
+ * ultima porta antes do deploy.
+ *
+ * O `prepare:assets` ja renomeou tudo que dava para renomear sozinho, entao o
+ * que sobra aqui é o que exige decisao humana.
+ */
+async function checkUploads() {
+  const { renomeios, compartilhados, orfaos } = await planejarUploads(root);
+
+  // Dois artigos apontando para o mesmo arquivo: ou alguem reaproveitou a
+  // imagem de proposito, ou um upload sobrescreveu o do outro artigo sem
+  // avisar. Os dois casos se resolvem do mesmo jeito — uma copia para cada.
+  for (const { arquivo, chaves } of compartilhados) {
+    fail(
+      `${uploads}/${arquivo}`,
+      `usado por ${chaves.length} artigos (${chaves.join(', ')}) — um upload com esse nome ` +
+        'sobrescreveria a imagem do outro; envie uma copia para cada artigo',
+    );
+  }
+
+  // Chegar aqui com renomeio pendente significa que o prepare:assets nao rodou
+  // ou esbarrou num conflito de nome. Em qualquer dos dois, o dist foi gerado
+  // com um nome que nao é o que o repositorio vai guardar.
+  for (const { de, para, artigo } of renomeios) {
+    fail(
+      `${uploads}/${de}`,
+      `deveria se chamar ${para} (artigo ${artigo}) — rode \`npm run prepare:assets\``,
+    );
+  }
+
+  for (const arquivo of orfaos) {
+    warn(`${uploads}/${arquivo}`, 'nenhum artigo usa esta imagem — candidata a remocao');
+  }
+}
+
 async function main() {
   if (!(await exists(dist))) {
     console.error('[verify] dist/ nao existe. Rode `npm run build` antes.');
@@ -204,6 +267,8 @@ async function main() {
   if (!(await exists(join(dist, 'pagefind')))) {
     warn('pagefind/', 'indice de busca ausente — rode `npm run index:search` depois do build');
   }
+
+  await checkUploads();
 
   // ── Coerencia da monetizacao ─────────────────────────────────────────────
   // Tudo aqui é falha silenciosa: nada quebra na tela, o site so deixa de

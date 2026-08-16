@@ -3,7 +3,7 @@ title: 'Eggs: protein, vitamins, and minerals all in one food'
 summary: One of the most complete foods out there, with high-quality protein — and the center of one of the biggest misunderstandings in modern nutrition.
 category: foods
 publishedAt: 2026-07-29
-cover: /src/assets/uploads/imagem3.webp
+cover: /src/assets/uploads/ovos-proteina-vitaminas-minerais-capa.webp
 coverAlt: Boiled and whole eggs with leafy greens and whole-grain bread in a healthy, natural composition.
 tags:
   - eggs

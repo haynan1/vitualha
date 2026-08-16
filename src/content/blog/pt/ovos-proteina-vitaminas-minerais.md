@@ -3,7 +3,7 @@ title: 'Ovos: proteína, vitaminas e minerais em um alimento só'
 summary: Um dos alimentos mais completos que existem, com proteína de alto valor biológico — e o centro de um dos maiores mal-entendidos da nutrição moderna.
 category: foods
 publishedAt: 2026-07-29
-cover: /src/assets/uploads/imagem3.webp
+cover: /src/assets/uploads/ovos-proteina-vitaminas-minerais-capa.webp
 coverAlt: Ovos cozidos e inteiros com folhas verdes e pão integral em uma composição saudável e natural.
 tags:
   - ovos

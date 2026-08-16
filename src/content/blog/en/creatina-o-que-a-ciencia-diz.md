@@ -4,7 +4,7 @@ summary: One of the most studied supplements in the world, with solid evidence f
 permalink: creatine-what-science-says
 category: fitness
 publishedAt: 2026-08-06
-cover: /src/assets/uploads/imagem.png
+cover: /src/assets/uploads/creatina-o-que-a-ciencia-diz-capa.png
 coverAlt: An open tub of creatine powder with a filled scoop, a glass of water, a shaker bottle, a dumbbell and a notebook on a concrete countertop
 tags:
   - creatine
