@@ -17,7 +17,7 @@ import { copyFile, mkdir, readFile, rename, stat, writeFile } from 'node:fs/prom
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { REFERENCIA, UPLOADS_DIR, decodeNome, planejarUploads } from './lib/uploads.mjs';
+import { UPLOADS_DIR, planejarUploads, reescreverReferencias } from './lib/uploads.mjs';
 
 const require = createRequire(import.meta.url);
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -238,7 +238,11 @@ async function renameUploads() {
     );
   }
 
-  /** So o que de fato mudou em disco pode ser reescrito no texto. */
+  /**
+   * So o que de fato mudou em disco pode ser reescrito no texto.
+   *
+   * @type {Map<string, string>}
+   */
   const aplicados = new Map();
 
   for (const { de, para } of renomeios) {
@@ -262,13 +266,7 @@ async function renameUploads() {
   for (const artigo of artigos) {
     for (const caminho of artigo.arquivos) {
       const antes = await readFile(join(root, caminho), 'utf8');
-
-      // Uma passada so: o nome novo nunca entra como candidato a ser trocado
-      // de novo, entao nao ha risco de renomeio em cascata.
-      const depois = antes.replace(REFERENCIA, (match, prefixo, nome) => {
-        const novo = aplicados.get(decodeNome(nome));
-        return novo === undefined ? match : `${prefixo}${novo}`;
-      });
+      const depois = reescreverReferencias(antes, aplicados);
 
       if (depois !== antes) await writeFile(join(root, caminho), depois);
     }
