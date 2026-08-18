@@ -43,7 +43,7 @@
   "devDependencies": {
     "@astrojs/check": "0.9.10",
     "@eslint/js": "10.0.1",
-    "@sveltia/cms": "0.188.1",
+    "@sveltia/cms": "0.189.1",
     "@types/hast": "3.0.5",
     "@types/mdast": "4.0.4",
     "eslint": "10.8.1",
