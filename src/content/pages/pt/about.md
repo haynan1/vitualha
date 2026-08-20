@@ -6,7 +6,9 @@ updatedAt: 2026-08-12
 
 A **Vitualha** existe por um motivo simples: a maior parte do conteúdo sobre alimentação disponível hoje está em algum lugar entre o incompleto e o irresponsável. Manchete fácil, promessa rápida, fonte nenhuma.
 
-Nosso critério é o oposto. Cada artigo parte da literatura científica, é escrito por nutricionista e passa por revisão técnica antes de ser publicado. Quando a evidência é fraca ou contraditória, dizemos isso em vez de escolher o lado mais atraente.
+Nosso critério é o oposto. Cada artigo parte da literatura científica, prioriza revisões sistemáticas, ensaios clínicos e diretrizes oficiais, e lista as fontes que sustentam cada afirmação — para que você possa conferir. Quando a evidência é fraca ou contraditória, dizemos isso em vez de escolher o lado mais atraente.
+
+Como isso é feito na prática — quais fontes aceitamos, onde a inteligência artificial entra no processo, quem assina, o que é revisado por profissional e como corrigimos erros — está descrito na [política editorial](/politica-editorial/).
 
 ## O que você encontra aqui
 

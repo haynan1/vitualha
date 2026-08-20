@@ -6,7 +6,9 @@ updatedAt: 2026-08-12
 
 **Vitualha** exists for a simple reason: most nutrition content available today sits somewhere between incomplete and irresponsible. Easy headline, fast promise, no source.
 
-Our standard is the opposite. Every article starts from the scientific literature, is written by a registered dietitian, and goes through technical review before publication. When the evidence is weak or contradictory, we say so instead of picking the more attractive side.
+Our standard is the opposite. Every article starts from the scientific literature, favours systematic reviews, clinical trials and official guidelines, and lists the sources behind each claim — so you can check them yourself. When the evidence is weak or contradictory, we say so instead of picking the more attractive side.
+
+How that works in practice — which sources we accept, where artificial intelligence fits into the process, who signs a piece, what gets professional review and how we correct mistakes — is set out in our [editorial policy](/en/editorial-policy/).
 
 ## What you find here
 

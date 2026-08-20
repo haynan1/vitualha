@@ -137,6 +137,18 @@ O que sustenta a credibilidade do site:
 - **Frase curta.** O leitor está no celular, provavelmente com pressa.
 - **Sempre feche com o que fazer** com a informação.
 
+**Sobre IA.** A política editorial declara publicamente onde ela entra:
+pesquisa inicial, organização, estruturação, tradução, revisão de linguagem e
+síntese de fontes. O que sustenta essa declaração é a contrapartida — nenhuma
+referência entra num artigo sem ser aberta e conferida, e nenhum número é
+publicado sem bater com o documento original. Modelo que inventa um DOI
+plausível é o caminho mais curto para perder a única coisa que este site tem
+a oferecer.
+
+**Nunca declare o que não aconteceu.** `reviewer` só é preenchido quando
+alguém revisou de fato, e credencial, formação e registro profissional não se
+inventam. A lacuna visível vale mais que o selo conveniente.
+
 Regras de fonte, revisão e correção: [política editorial](src/content/pages/pt/editorial.md).
 
 ---

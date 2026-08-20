@@ -14,7 +14,7 @@ Necessidades nutricionais variam conforme idade, sexo, histórico clínico, uso 
 
 ## Limitação de responsabilidade
 
-Empregamos cuidado editorial e revisão técnica na produção do conteúdo, mas não garantimos que ele esteja livre de imprecisões ou permanentemente atualizado diante de novas evidências. Decisões tomadas com base no conteúdo do site são de responsabilidade do leitor.
+Empregamos cuidado editorial na produção do conteúdo, conforme descrito na [política editorial](/politica-editorial/), mas não garantimos que ele esteja livre de imprecisões ou permanentemente atualizado diante de novas evidências. Decisões tomadas com base no conteúdo do site são de responsabilidade do leitor.
 
 ## Propriedade intelectual
 

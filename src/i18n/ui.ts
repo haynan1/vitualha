@@ -102,7 +102,7 @@ const pt = {
   meta: {
     homeTitle: 'Nutrição baseada em evidências',
     homeDescription:
-      'Artigos sobre alimentação, nutrientes e saúde, escritos por nutricionistas e apoiados em ciência.',
+      'Artigos sobre alimentação, nutrientes e saúde, apoiados em evidência científica e com as fontes à vista.',
     articlesDescription:
       'Todo o acervo da Vitualha: alimentos, nutrientes, saúde, fitness e receitas.',
     searchDescription: 'Busque artigos sobre alimentos, nutrientes, saúde e receitas.',
@@ -310,7 +310,7 @@ const en: UIDict = {
   meta: {
     homeTitle: 'Evidence-based nutrition',
     homeDescription:
-      'Articles about food, nutrients and health, written by dietitians and grounded in science.',
+      'Articles about food, nutrients and health, grounded in scientific evidence with the sources in plain sight.',
     articlesDescription:
       'The full Vitualha archive: foods, nutrients, health, fitness and recipes.',
     searchDescription: 'Search articles about foods, nutrients, health and recipes.',

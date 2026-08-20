@@ -14,7 +14,7 @@ Nutritional needs vary with age, sex, clinical history, medication, lab results 
 
 ## Limitation of liability
 
-We apply editorial care and technical review when producing content, but we do not guarantee that it is free of inaccuracies or permanently current as new evidence emerges. Decisions made based on this content are the reader's responsibility.
+We apply editorial care when producing content, as described in our [editorial policy](/en/editorial-policy/), but we do not guarantee that it is free of inaccuracies or permanently current as new evidence emerges. Decisions made based on this content are the reader's responsibility.
 
 ## Intellectual property
 
