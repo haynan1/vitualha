@@ -46,8 +46,6 @@ faq:
     answer: Sim. A vitamina C aumenta a absorção do ferro presente em alimentos de origem vegetal. Por isso, incluir frutas como laranja, acerola, goiaba, caju ou mamão em refeições que contenham feijão, lentilha e outros vegetais pode ser uma estratégia alimentar útil. (ODS)
 ---
 
-# Frutas com vitamina C: 8 opções e quanto cada uma oferece
-
 Quando falamos em **frutas com vitamina C**, a laranja costuma ser a primeira lembrança. Ela realmente é uma boa fonte, mas está longe de ser a única — e nem sempre é a fruta com maior concentração desse nutriente.
 
 Acerola, caju, goiaba, mamão, kiwi e morango podem fornecer quantidades expressivas de vitamina C. Algumas delas chegam a superar consideravelmente a laranja quando comparamos porções de 100 gramas. ([TBCA](https://www.tbca.net.br/base-dados/int_composicao_alimentos.php?n0REd3kv7e86D%2BViXWYUnQ%3D%3D=MHB%2FMSN8lxZs9gJPLzL%2FMg%3D%3D&utm_source=chatgpt.com 'Malpighia spp.'))

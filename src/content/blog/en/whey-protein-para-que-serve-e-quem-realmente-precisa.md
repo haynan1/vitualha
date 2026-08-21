@@ -57,8 +57,6 @@ faq:
     answer: Whey contains calories, just like other protein-containing foods. It does not inherently cause fat gain, but adding shakes on top of an already sufficient diet can increase total energy intake. Its effect therefore depends on how the supplement fits into the person's overall diet.
 ---
 
-# Whey Protein: What Is It For and Who Actually Needs It?
-
 Few supplements are as closely associated with the gym as whey protein. For many people, finishing a workout and immediately making a shake almost feels mandatory.
 
 It isn't.

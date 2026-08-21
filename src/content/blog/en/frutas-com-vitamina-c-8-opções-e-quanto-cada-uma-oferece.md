@@ -46,8 +46,6 @@ faq:
     answer: Yes. Vitamin C improves the absorption of iron from plant-based foods. Pairing beans, lentils or other plant sources of iron with vitamin C-rich fruits such as guava, orange, acerola, cashew apple or papaya can therefore be a useful dietary strategy. (ODS)
 ---
 
-# Vitamin C-Rich Fruits: 8 Options and How Much They Provide
-
 When people think of **vitamin C-rich fruits**, oranges are often the first food that comes to mind. Oranges certainly provide vitamin C, but they are not the only option — and they are not necessarily the richest source.
 
 Acerola, cashew apple, guava, papaya, kiwi and strawberries can all provide substantial amounts. Some contain considerably more vitamin C per 100 grams than oranges. ([TBCA](https://www.tbca.net.br/base-dados/int_composicao_alimentos.php?n0REd3kv7e86D%2BViXWYUnQ%3D%3D=MHB%2FMSN8lxZs9gJPLzL%2FMg%3D%3D&utm_source=chatgpt.com 'Malpighia spp.'))

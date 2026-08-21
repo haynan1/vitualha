@@ -57,8 +57,6 @@ faq:
     answer: Whey possui calorias, assim como qualquer alimento que forneça proteína. Ele não causa ganho de gordura corporal por uma propriedade especial do suplemento, mas suas calorias entram no consumo energético diário. Adicionar shakes sem considerar o restante da alimentação pode aumentar a ingestão energética. Quando utilizado para substituir ou complementar adequadamente uma refeição, o efeito depende do contexto alimentar completo.
 ---
 
-# Whey protein: para que serve e quem realmente precisa?
-
 Poucos suplementos se tornaram tão associados à academia quanto o whey protein. Para muita gente, terminar o treino e preparar um shake parece quase parte obrigatória da rotina.
 
 Mas não é.
