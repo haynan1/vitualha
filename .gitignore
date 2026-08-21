@@ -52,3 +52,4 @@ RELATORIO.md
 # so como diretorio: `temp` solto tambem esconderia um src/.../temp/ criado
 # por engano, e arquivo que some sem avisar é o pior tipo de arquivo perdido.
 /temp/
+/escrevendo/
