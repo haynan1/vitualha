@@ -17,7 +17,8 @@ const { tone = 'info' } = Astro.props;
 <style>
   .notice {
     display: grid;
-    grid-template-columns: auto 1fr;
+    /* `1fr` sozinho tem piso de min-content e nao encolhe: minmax(0, …). */
+    grid-template-columns: auto minmax(0, 1fr);
     gap: var(--space-3);
     align-items: start;
     padding: var(--space-4) var(--space-5);

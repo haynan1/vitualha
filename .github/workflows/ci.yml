@@ -75,6 +75,14 @@ jobs:
           PUBLIC_ADSENSE_SLOT_LISTING: ${{ vars.PUBLIC_ADSENSE_SLOT_LISTING }}
         run: npm run build
 
+      # O layout so existe depois que um navegador calcula largura: e por isso
+      # que esta etapa vem depois do build e nao junto dos testes. `--strict`
+      # garante que um runner sem Chrome reprove, em vez de pular calado.
+      - name: Layout no celular
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        run: npm run verify:layout -- --strict
+
       - name: Guardar o site construido
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:

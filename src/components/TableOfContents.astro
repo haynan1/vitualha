@@ -54,6 +54,8 @@ const items = headings.filter((heading) => heading.depth === 2 || heading.depth 
   .toc__list {
     margin-block-start: var(--space-4);
     display: grid;
+    /* Titulo longo de secao quebra dentro do rail em vez de alargar a coluna. */
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-1);
     list-style: none;
     padding: 0;

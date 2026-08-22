@@ -273,14 +273,24 @@ const canonical = isFallback ? absolute(localeUrls[contentLocale], Astro.site) :
     max-width: var(--measure);
   }
 
+  /**
+   * `minmax(0, 1fr)` e nao o track implicito: um track de grid com tamanho
+   * automatico cresce ate o min-content do conteudo. Uma tabela larga dentro
+   * do artigo — mesmo ja envolvida por `.table-scroll` — empurra esse minimo
+   * para centenas de pixels, a coluna estoura o container e a pagina inteira
+   * passa a rolar na horizontal no celular. Travar o piso em zero devolve a
+   * rolagem para dentro do proprio bloco, que é onde ela deve ficar.
+   */
   .article__layout {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-8);
     margin-block-start: var(--space-8);
   }
 
   .article__aside {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-5);
     align-content: start;
   }
@@ -291,6 +301,7 @@ const canonical = isFallback ? absolute(localeUrls[contentLocale], Astro.site) :
 
   .shell__after {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-8);
     margin-block-start: var(--space-9);
     max-width: var(--container-narrow);
@@ -298,6 +309,7 @@ const canonical = isFallback ? absolute(localeUrls[contentLocale], Astro.site) :
 
   .shell__authors {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-4);
   }
 

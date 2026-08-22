@@ -68,7 +68,7 @@ const profiles = Object.entries(links).filter(([, url]) => Boolean(url)) as Arra
 <style>
   .author {
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto minmax(0, 1fr);
     gap: var(--space-4);
     padding: var(--space-5);
     border-radius: var(--radius-lg);

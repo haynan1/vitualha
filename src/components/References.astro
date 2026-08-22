@@ -48,6 +48,7 @@ const ui = t(locale);
   .refs__list {
     margin-block-start: var(--space-4);
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-3);
     padding-inline-start: var(--space-5);
   }
@@ -60,6 +61,9 @@ const ui = t(locale);
   .refs__link {
     color: var(--primary-strong);
     font-size: var(--text-sm);
+    /* Titulo de artigo cientifico traz DOI e nome sem espaco: quebra em vez
+       de estourar a caixa. */
+    overflow-wrap: break-word;
     text-decoration: underline;
     text-underline-offset: 0.18em;
     text-decoration-color: color-mix(in srgb, var(--primary) 40%, transparent);

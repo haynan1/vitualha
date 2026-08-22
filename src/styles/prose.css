@@ -9,6 +9,12 @@
   font-size: var(--text-md);
   line-height: var(--leading-relaxed);
   color: var(--text);
+  /* O corpo é um item de grid: sem `min-width: 0` o piso dele é o min-content
+     do conteudo, e um bloco largo — tabela, bloco de codigo — alarga a coluna
+     inteira em vez de rolar por dentro. */
+  min-width: 0;
+  /* URL, DOI ou nome quimico sem espaco quebra em vez de vazar da medida. */
+  overflow-wrap: break-word;
 }
 
 .prose > * + * {
@@ -161,12 +167,28 @@
   font-size: var(--text-sm);
 }
 
-/* Tabela larga rola dentro do proprio bloco; a pagina nunca rola na horizontal. */
+/* Tabela larga rola dentro do proprio bloco; a pagina nunca rola na horizontal.
+   `max-width: 100%` é o que prende a promessa: o container de rolagem ainda
+   reporta o min-content da tabela para cima, e sem o teto explicito ele
+   participa do calculo de largura do bloco que o contem. */
 .prose .table-scroll {
+  max-width: 100%;
   overflow-x: auto;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  background: var(--surface);
+  /**
+   * Sombras de rolagem: as duas primeiras camadas sao mascaras da cor do
+   * bloco presas ao conteudo (`local`), as duas seguintes sao sombras presas
+   * a caixa (`scroll`). Encostado numa ponta, a mascara cobre a sombra
+   * daquele lado; ao rolar, ela sai junto com o conteudo e a sombra aparece.
+   * Assim o leitor ve que a tabela continua, sem uma linha de JavaScript.
+   */
+  background:
+    linear-gradient(to right, var(--surface) 60%, transparent) 0 0 / 32px 100% no-repeat local,
+    linear-gradient(to left, var(--surface) 60%, transparent) 100% 0 / 32px 100% no-repeat local,
+    linear-gradient(to right, var(--scroll-shadow), transparent) 0 0 / 24px 100% no-repeat scroll,
+    linear-gradient(to left, var(--scroll-shadow), transparent) 100% 0 / 24px 100% no-repeat scroll,
+    var(--surface);
 }
 
 .prose th,
@@ -200,6 +222,7 @@
 }
 
 .prose pre {
+  max-width: 100%;
   padding: var(--space-4);
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
@@ -231,7 +254,8 @@
 
 .callout {
   display: grid;
-  grid-template-columns: auto 1fr;
+  /* `1fr` puro tem piso de min-content: minmax(0, …) deixa o texto encolher. */
+  grid-template-columns: auto minmax(0, 1fr);
   gap: var(--space-3) var(--space-4);
   padding: var(--space-5);
   border-radius: var(--radius-lg);
